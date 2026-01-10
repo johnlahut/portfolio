@@ -5,6 +5,11 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ThemeProvider } from 'theme-provider.tsx';
+import { Parser } from 'web-tree-sitter';
+
+Parser.init({ locateFile: () => '/tree-sitter.wasm' }).then(() => {
+  /* the library is ready */
+});
 
 const router = createRouter({ routeTree });
 const client = new QueryClient({
