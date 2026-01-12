@@ -1,10 +1,11 @@
+import { Language, Query, Tree } from 'web-tree-sitter';
+
 import type {
   ParsedItem,
   ParsedToken,
   ResolvedParsedItem,
   TransformerForm,
 } from './types';
-import { Language, Query, Tree } from 'web-tree-sitter';
 
 // https://tree-sitter.github.io/tree-sitter/7-playground.html
 const JAVA_QUERY = `
@@ -64,7 +65,6 @@ const JAVA_QUERY_INDEX_MAP: { [key: number]: ParsedToken } = {
   4: 'variable_array',
   5: 'enum',
 };
-
 
 const parseType = (item: ParsedItem): Omit<ResolvedParsedItem, 'itemId'> => {
   const TYPE_MAP: Record<string, string> = {
@@ -222,7 +222,7 @@ const parseType = (item: ParsedItem): Omit<ResolvedParsedItem, 'itemId'> => {
 };
 
 const parseTree = (code: string, tree: Tree | null, lang: Language) => {
-  let className: string | null = null;
+  let className: string = '';
   const parsedItems: { [key: string]: ParsedItem } = {};
 
   const root = tree?.rootNode;
@@ -335,12 +335,20 @@ const parseTree = (code: string, tree: Tree | null, lang: Language) => {
   };
 };
 
-const generateTypescript = (form: TransformerForm) => {
+const generateTypescript = ({
+  classifier,
+  typeName,
+  parsedItems,
+  export: shouldExport,
+}: Pick<
+  TransformerForm,
+  'classifier' | 'typeName' | 'parsedItems' | 'export'
+>) => {
   return (
-    `${form.export ? 'export ' : ''}` +
-    `${form.classifier} ` +
-    `${form.typeName}${form.classifier === 'type' ? ' =' : ''} {\n` +
-    form.parsedItems
+    `${shouldExport ? 'export ' : ''}` +
+    `${classifier} ` +
+    `${typeName}${classifier === 'type' ? ' =' : ''} {\n` +
+    parsedItems
       .map((item) => {
         const typeDefinition = item.type
           .map((t) => {

@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { FormProvider, useForm } from 'react-hook-form';
+import { TransformerProvider } from 'transformer/context';
 import { TransformerLayout } from 'transformer/layout';
 import { type TransformerForm } from 'transformer/types';
 
@@ -27,8 +28,10 @@ function TransformerRoute() {
   const form = useTransformerForm();
 
   return (
-    <FormProvider {...form}>
-      <TransformerLayout />
-    </FormProvider>
+    <TransformerProvider>
+      <FormProvider {...form}>
+        <TransformerLayout />
+      </FormProvider>
+    </TransformerProvider>
   );
 }

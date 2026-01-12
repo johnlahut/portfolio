@@ -1,26 +1,33 @@
 import { useEffect } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
 import type { TransformerForm } from 'transformer/types';
 
-export const AutoGenerator = ({ onGenerate }: { onGenerate: () => void }) => {
-  const {
-    control,
-    formState: { isValid },
-  } = useFormContext<TransformerForm>();
+export const AutoGenerator = ({
+  isValid,
+  watchedValues,
+  onGenerate,
+}: {
+  isValid: boolean;
+  watchedValues: Partial<TransformerForm>;
+  onGenerate: () => void;
+}) => {
+  useEffect(
+    () => {
+      const timer = setTimeout(() => {
+        isValid && onGenerate();
+      }, 300);
+      return () => clearTimeout(timer);
+    },
 
-  const watchedValues = useWatch({
-    control,
-    name: ['export', 'classifier', 'typeName', 'parsedItems'],
-  });
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (isValid) {
-        onGenerate();
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [watchedValues, isValid, onGenerate]);
+    // important to explicity list the props that we want to auto-refresh on
+    [
+      watchedValues.classifier,
+      watchedValues.parsedItems,
+      watchedValues.export,
+      watchedValues.typeName,
+      isValid,
+      onGenerate,
+    ],
+  );
 
   return null;
 };

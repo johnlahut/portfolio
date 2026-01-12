@@ -1,5 +1,6 @@
 import './index.css';
 import { routeTree } from './routeTree.gen.ts';
+import { Toaster } from '@/components/ui/sonner.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { StrictMode } from 'react';
@@ -33,9 +34,10 @@ if (!rootElement.innerHTML) {
   createRoot(rootElement).render(
     <StrictMode>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <QueryClientProvider client={client}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
+        <QueryClientProvider client={client}>
+          <RouterProvider router={router} />
+          <Toaster duration={2000} position="top-center" />
+        </QueryClientProvider>
       </ThemeProvider>
     </StrictMode>,
   );

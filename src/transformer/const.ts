@@ -1,8 +1,9 @@
-import type { LanguageChoice } from './types';
 import JavaPlugin from 'prettier-plugin-java';
 import BabelPlugin from 'prettier/plugins/babel';
 import EstreePlugin from 'prettier/plugins/estree';
 import TypescriptPlugin from 'prettier/plugins/typescript';
+
+import type { LanguageChoice } from './types';
 
 // https://github.com/wooorm/starry-night?tab=readme-ov-file#languages
 export const LanguageChoices: LanguageChoice[] = [
@@ -49,15 +50,24 @@ type TypeOption = {
   types: string[];
   category: 'common' | 'advanced' | 'custom';
 };
+export const STANDARD_TYPES = [
+  'string',
+  'number',
+  'object',
+  'null',
+  'boolean',
+  'any',
+  'unknown',
+];
 export const TypeOptions: TypeOption[] = [
   {
     label: '',
-    types: ['string', 'number', 'object', 'null', 'boolean', 'any', 'unknown'],
+    types: [...STANDARD_TYPES],
     category: 'common',
   },
   {
     label: 'Custom',
-    types: ['MyCustomType', 'AnotherType', 'CustomInterface'],
+    types: [],
     category: 'custom',
   },
 ];

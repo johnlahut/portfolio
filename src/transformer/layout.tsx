@@ -1,15 +1,3 @@
-import { AutoGenerator } from './components/AutoGenerator';
-import { ParsedPropertyList } from './components/ParsedTypesList';
-import { TypescriptOutput } from './components/TypescriptOutput';
-import { LanguageChoices } from './const';
-import { ObjectNameInput } from './form/input';
-import { ClassifierSelect, LanguageSelect } from './form/select';
-import { ExportSwitch } from './form/switch';
-import { CodeEditor } from './form/tiptap';
-import { useLoadTreeSitterWasm, usePrettierFormat } from './hooks';
-import { JAVA_CONFIG } from './queries';
-import type { TransformerForm } from './types';
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardAction,
@@ -23,42 +11,88 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
-import { useCopyToClipboard } from 'hooks/use-copy-to-clipboard';
-import { CheckIcon, CopyIcon } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { toast } from 'sonner';
+import { useCallback, useEffect, useState } from 'react';
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+
+import { AutoGenerator } from './components/AutoGenerator';
+import { ParsedPropertyList } from './components/ParsedTypesList';
+import { TypescriptOutput } from './components/TypescriptOutput';
+import { LanguageChoices } from './const';
+import { CopyButton } from './form/button';
+import { ObjectNameInput } from './form/input';
+import { ClassifierSelect, LanguageSelect } from './form/select';
+import { ExportSwitch } from './form/switch';
+import { CodeEditor } from './form/tiptap';
+import { useLoadTreeSitterWasm, usePrettierFormat } from './hooks';
+import { JAVA_CONFIG } from './queries';
+import type { TransformerForm } from './types';
 
 const { generateTypescript } = JAVA_CONFIG;
 
 export const TransformerLayout = () => {
-  const form = useFormContext<TransformerForm>();
+  const {
+    formState: { isValid },
+  } = useFormContext<TransformerForm>();
 
-  const selectedClassifier = form.watch('classifier');
-  const _flag = form.watch('language');
+  const { fields: parsedItems, remove: removeParsedItem } = useFieldArray<
+    TransformerForm,
+    'parsedItems'
+  >({ name: 'parsedItems' });
+  const inputLang = useWatch<TransformerForm, 'language'>({ name: 'language' });
+
+  const [shouldExport, classifier, typeName] = useWatch<
+    TransformerForm,
+    ['export', 'classifier', 'typeName']
+  >({
+    name: ['export', 'classifier', 'typeName'],
+  });
 
   const { parser, flag } =
-    LanguageChoices[LanguageChoices.findIndex((i) => i.flag === _flag)];
+    LanguageChoices[LanguageChoices.findIndex((i) => i.flag === inputLang)];
 
   const [typescript, setTypescript] = useState<string>('');
+
+  // reset output when parsedItems is emptied
+  useEffect(() => {
+    if (parsedItems.length === 0) {
+      setTypescript('');
+    }
+  }, [parsedItems]);
 
   const { format } = usePrettierFormat();
   const { language } = useLoadTreeSitterWasm({ parser });
 
   const onGenerate = useCallback(() => {
     format(
-      { code: generateTypescript(form.getValues()), parser: 'typescript' },
       {
-        onSuccess: (value) => setTypescript(value),
+        code: generateTypescript({
+          parsedItems,
+          typeName,
+          classifier,
+          export: shouldExport,
+        }),
+        parser: 'typescript',
+      },
+      {
+        onSuccess: (value) => {
+          setTypescript(value);
+        },
       },
     );
-  }, [format, form]);
-
-  const { isCopied, copyToClipboard } = useCopyToClipboard();
+  }, [format, parsedItems, shouldExport, typeName, classifier]);
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <AutoGenerator onGenerate={onGenerate} />
+      <AutoGenerator
+        isValid={isValid}
+        onGenerate={onGenerate}
+        watchedValues={{
+          classifier,
+          typeName,
+          parsedItems,
+          export: shouldExport,
+        }}
+      />
       <div className="flex h-full overflow-auto mx-4">
         <ResizablePanelGroup
           direction="horizontal"
@@ -95,7 +129,7 @@ export const TransformerLayout = () => {
                   <ClassifierSelect />
                   <ObjectNameInput />
                   <span className="font-mono text-xs text-nowrap">
-                    {selectedClassifier === 'type' && <span>{' = '}</span>}
+                    {classifier === 'type' && <span>{' = '}</span>}
                     <span className="text-syntax-punctuation">{'{'}</span>
                   </span>
                 </div>
@@ -104,7 +138,10 @@ export const TransformerLayout = () => {
                   className="overflow-auto flex flex-col gap-0.5 py-2"
                   id="items-list"
                 >
-                  <ParsedPropertyList />
+                  <ParsedPropertyList
+                    parsedItems={parsedItems}
+                    onDelete={removeParsedItem}
+                  />
                 </div>
                 <span className="font-mono text-xs text-syntax-punctuation">
                   {'};'}
@@ -121,15 +158,7 @@ export const TransformerLayout = () => {
                   Preview the final Typescript definition here.
                 </CardDescription>
                 <CardAction>
-                  <Button
-                    variant={'outline'}
-                    onClick={() => {
-                      copyToClipboard(typescript);
-                      toast('Copied to clipboard.');
-                    }}
-                  >
-                    {isCopied ? <CheckIcon /> : <CopyIcon />}
-                  </Button>
+                  <CopyButton value={typescript} />
                 </CardAction>
               </CardHeader>
               <CardContent className="h-full overflow-auto">

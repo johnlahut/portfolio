@@ -1,8 +1,9 @@
-import { TipTapCode } from './tiptap/TipTapCode';
 import type { EditorContentProps } from '@tiptap/react';
 import { useCallback, useEffect } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { LanguageChoices } from 'transformer/const';
+import { useTransformerContext } from 'transformer/context';
+import { extractCustomTypes } from 'transformer/hooks/useCustomTypes';
 import { JAVA_CONFIG } from 'transformer/queries';
 import type {
   LanguageFlag,
@@ -10,6 +11,8 @@ import type {
   TransformerForm,
 } from 'transformer/types';
 import { Language, Parser } from 'web-tree-sitter';
+
+import { TipTapCode } from './tiptap/TipTapCode';
 
 const treeSitter = new Parser();
 const { parse, parseTree } = JAVA_CONFIG;
@@ -54,6 +57,7 @@ const Editor = ({
   language: Language | undefined;
 } & Omit<EditorContentProps, 'editor' | 'onChange'>) => {
   const { setValue, getValues } = useFormContext<TransformerForm>();
+  const { setInputTypes } = useTransformerContext();
 
   const handleSmartMerge = useCallback(
     (
@@ -142,19 +146,27 @@ const Editor = ({
       const mergedItems = handleSmartMerge(currentItems, newParsedItems);
 
       setValue('typeName', className ?? '');
-
       setValue('parsedItems', mergedItems);
+
+      // we keep any types that are in the input pane
+      const originalTypes = extractCustomTypes(newParsedItems, className);
+      setInputTypes(originalTypes);
     }
-  }, [language, handleSmartMerge]);
+  }, [language, handleSmartMerge, setInputTypes]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       if (value.trim().length > 0 && language) {
         onParse();
+      } else if (value.trim().length === 0) {
+        // Reset form when input is cleared
+        setValue('parsedItems', []);
+        setValue('typeName', '');
+        setInputTypes([]);
       }
     }, 800);
     return () => clearTimeout(timer);
-  }, [value, language, onParse]);
+  }, [value, language, onParse, setValue, setInputTypes]);
 
   return (
     <TipTapCode
