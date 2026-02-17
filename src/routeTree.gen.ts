@@ -10,11 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TransformerRouteImport } from './routes/transformer'
+import { Route as ChirpRouteImport } from './routes/chirp'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChirpLoginRouteImport } from './routes/chirp_.login'
+import { Route as ChirpImageImageIdRouteImport } from './routes/chirp/image.$imageId'
 
 const TransformerRoute = TransformerRouteImport.update({
   id: '/transformer',
   path: '/transformer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChirpRoute = ChirpRouteImport.update({
+  id: '/chirp',
+  path: '/chirp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,31 +30,63 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChirpLoginRoute = ChirpLoginRouteImport.update({
+  id: '/chirp_/login',
+  path: '/chirp/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChirpImageImageIdRoute = ChirpImageImageIdRouteImport.update({
+  id: '/image/$imageId',
+  path: '/image/$imageId',
+  getParentRoute: () => ChirpRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/chirp': typeof ChirpRouteWithChildren
   '/transformer': typeof TransformerRoute
+  '/chirp/login': typeof ChirpLoginRoute
+  '/chirp/image/$imageId': typeof ChirpImageImageIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/chirp': typeof ChirpRouteWithChildren
   '/transformer': typeof TransformerRoute
+  '/chirp/login': typeof ChirpLoginRoute
+  '/chirp/image/$imageId': typeof ChirpImageImageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/chirp': typeof ChirpRouteWithChildren
   '/transformer': typeof TransformerRoute
+  '/chirp_/login': typeof ChirpLoginRoute
+  '/chirp/image/$imageId': typeof ChirpImageImageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/transformer'
+  fullPaths:
+    | '/'
+    | '/chirp'
+    | '/transformer'
+    | '/chirp/login'
+    | '/chirp/image/$imageId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/transformer'
-  id: '__root__' | '/' | '/transformer'
+  to: '/' | '/chirp' | '/transformer' | '/chirp/login' | '/chirp/image/$imageId'
+  id:
+    | '__root__'
+    | '/'
+    | '/chirp'
+    | '/transformer'
+    | '/chirp_/login'
+    | '/chirp/image/$imageId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChirpRoute: typeof ChirpRouteWithChildren
   TransformerRoute: typeof TransformerRoute
+  ChirpLoginRoute: typeof ChirpLoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +98,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TransformerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chirp': {
+      id: '/chirp'
+      path: '/chirp'
+      fullPath: '/chirp'
+      preLoaderRoute: typeof ChirpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -65,12 +112,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chirp_/login': {
+      id: '/chirp_/login'
+      path: '/chirp/login'
+      fullPath: '/chirp/login'
+      preLoaderRoute: typeof ChirpLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chirp/image/$imageId': {
+      id: '/chirp/image/$imageId'
+      path: '/image/$imageId'
+      fullPath: '/chirp/image/$imageId'
+      preLoaderRoute: typeof ChirpImageImageIdRouteImport
+      parentRoute: typeof ChirpRoute
+    }
   }
 }
 
+interface ChirpRouteChildren {
+  ChirpImageImageIdRoute: typeof ChirpImageImageIdRoute
+}
+
+const ChirpRouteChildren: ChirpRouteChildren = {
+  ChirpImageImageIdRoute: ChirpImageImageIdRoute,
+}
+
+const ChirpRouteWithChildren = ChirpRoute._addFileChildren(ChirpRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChirpRoute: ChirpRouteWithChildren,
   TransformerRoute: TransformerRoute,
+  ChirpLoginRoute: ChirpLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,15 +1,17 @@
-import { TipTapCode } from './tiptap/TipTapCode';
 import type { EditorContentProps } from '@tiptap/react';
 import { useCallback, useEffect } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { LanguageChoices } from 'transformer/const';
-import { JAVA_CONFIG } from 'transformer/queries';
+import { Language, Parser } from 'web-tree-sitter';
+
+import { LanguageChoices } from '~/transformer/const';
+import { JAVA_CONFIG } from '~/transformer/queries';
 import type {
   LanguageFlag,
   ResolvedParsedItem,
   TransformerForm,
-} from 'transformer/types';
-import { Language, Parser } from 'web-tree-sitter';
+} from '~/transformer/types';
+
+import { TipTapCode } from './tiptap/TipTapCode';
 
 const treeSitter = new Parser();
 const { parse, parseTree } = JAVA_CONFIG;
@@ -145,7 +147,7 @@ const Editor = ({
 
       setValue('parsedItems', mergedItems);
     }
-  }, [language, handleSmartMerge]);
+  }, [language, handleSmartMerge, getValues, setValue]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

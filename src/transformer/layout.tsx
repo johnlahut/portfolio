@@ -1,14 +1,9 @@
-import { AutoGenerator } from './components/AutoGenerator';
-import { ParsedPropertyList } from './components/ParsedTypesList';
-import { TypescriptOutput } from './components/TypescriptOutput';
-import { LanguageChoices } from './const';
-import { ObjectNameInput } from './form/input';
-import { ClassifierSelect, LanguageSelect } from './form/select';
-import { ExportSwitch } from './form/switch';
-import { CodeEditor } from './form/tiptap';
-import { useLoadTreeSitterWasm, usePrettierFormat } from './hooks';
-import { JAVA_CONFIG } from './queries';
-import type { TransformerForm } from './types';
+import { useCopyToClipboard } from 'hooks/use-copy-to-clipboard';
+import { CheckIcon, CopyIcon } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -23,11 +18,18 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
-import { useCopyToClipboard } from 'hooks/use-copy-to-clipboard';
-import { CheckIcon, CopyIcon } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { toast } from 'sonner';
+
+import { AutoGenerator } from './components/AutoGenerator';
+import { ParsedPropertyList } from './components/ParsedTypesList';
+import { TypescriptOutput } from './components/TypescriptOutput';
+import { LanguageChoices } from './const';
+import { ObjectNameInput } from './form/input';
+import { ClassifierSelect, LanguageSelect } from './form/select';
+import { ExportSwitch } from './form/switch';
+import { CodeEditor } from './form/tiptap';
+import { useLoadTreeSitterWasm, usePrettierFormat } from './hooks';
+import { JAVA_CONFIG } from './queries';
+import type { TransformerForm } from './types';
 
 const { generateTypescript } = JAVA_CONFIG;
 

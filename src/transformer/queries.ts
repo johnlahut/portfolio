@@ -1,10 +1,11 @@
+import { Language, Query, Tree } from 'web-tree-sitter';
+
 import type {
   ParsedItem,
   ParsedToken,
   ResolvedParsedItem,
   TransformerForm,
 } from './types';
-import { Language, Query, Tree } from 'web-tree-sitter';
 
 // https://tree-sitter.github.io/tree-sitter/7-playground.html
 const JAVA_QUERY = `
@@ -64,7 +65,6 @@ const JAVA_QUERY_INDEX_MAP: { [key: number]: ParsedToken } = {
   4: 'variable_array',
   5: 'enum',
 };
-
 
 const parseType = (item: ParsedItem): Omit<ResolvedParsedItem, 'itemId'> => {
   const TYPE_MAP: Record<string, string> = {

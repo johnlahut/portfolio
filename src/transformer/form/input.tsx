@@ -1,7 +1,9 @@
+import { Controller, useWatch } from 'react-hook-form';
+
 import { Input } from '@/components/ui/input';
 import { InputGroupInput } from '@/components/ui/input-group';
-import { Controller, useWatch } from 'react-hook-form';
-import type { TransformerForm } from 'transformer/types';
+
+import type { TransformerForm } from '~/transformer/types';
 
 export const ObjectNameInput = () => {
   return (

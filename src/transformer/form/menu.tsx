@@ -1,11 +1,13 @@
+import { Controller } from 'react-hook-form';
+
 import {
   CommandGroup,
   CommandItem,
   CommandSeparator,
 } from '@/components/ui/command';
-import { Controller } from 'react-hook-form';
-import { TypeOptions } from 'transformer/const';
-import type { TransformerForm } from 'transformer/types';
+
+import { TypeOptions } from '~/transformer/const';
+import type { TransformerForm } from '~/transformer/types';
 
 export const TypeMenuList = ({
   vIndex,

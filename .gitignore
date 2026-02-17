@@ -25,3 +25,22 @@ dist-ssr
 .vite
 .tanstack
 .tsbuildinfo
+venv/
+__pycache__/
+
+# Environment files
+.env*
+!.env.example
+
+# Credential and key files
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+credentials.json
+service-account*.json
+
+# Database files
+*.sqlite
+*.db

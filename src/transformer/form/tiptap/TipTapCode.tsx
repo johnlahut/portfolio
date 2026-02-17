@@ -8,9 +8,10 @@ import {
 } from '@tiptap/react';
 import { toHtml } from 'hast-util-to-html';
 import { useEffect, useMemo, useState } from 'react';
-import { ClassedSpan } from 'transformer/extensions/ClassedSpan';
-import { SpanCodeBlock } from 'transformer/extensions/SpanCodeBlock';
-import type { LanguageFlag } from 'transformer/types';
+
+import { ClassedSpan } from '~/transformer/extensions/ClassedSpan';
+import { SpanCodeBlock } from '~/transformer/extensions/SpanCodeBlock';
+import type { LanguageFlag } from '~/transformer/types';
 
 export const TipTapCode = ({
   value,

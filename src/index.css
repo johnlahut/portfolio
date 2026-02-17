@@ -67,6 +67,22 @@
   --sidebar-border: oklch(0.928 0.006 264.531);
   --sidebar-ring: oklch(0.707 0.022 261.325);
 
+  /* Face bounding box states */
+  --face-tagged: oklch(0.696 0.17 162.48);
+  --face-tagged-hover: oklch(0.765 0.177 163.223);
+  --face-tagged-label-bg: oklch(0.262 0.051 172.552);
+  --face-tagged-label-fg: oklch(0.918 0.076 155.995);
+
+  --face-likely: oklch(0.738 0.173 66.947);
+  --face-likely-hover: oklch(0.792 0.162 68.416);
+  --face-likely-label-bg: oklch(0.266 0.079 36.259);
+  --face-likely-label-fg: oklch(0.932 0.042 73.536);
+
+  --face-unknown: oklch(0.704 0.04 256.788);
+  --face-unknown-hover: oklch(0.777 0.029 256.848);
+  --face-unknown-label-bg: oklch(0.208 0.042 265.755);
+  --face-unknown-label-fg: oklch(0.929 0.013 255.508);
+
   /* Custom Syntax Highlighting Theme (VO Palette) */
   --syntax-keyword: oklch(0.577 0.245 27.325); /* .pl-k (export, type) */
   --syntax-entity: oklch(0.646 0.222 41.116); /* .pl-en (ClassName) */

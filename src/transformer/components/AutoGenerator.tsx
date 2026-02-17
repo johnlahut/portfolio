@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import type { TransformerForm } from 'transformer/types';
+
+import type { TransformerForm } from '~/transformer/types';
 
 export const AutoGenerator = ({ onGenerate }: { onGenerate: () => void }) => {
   const {

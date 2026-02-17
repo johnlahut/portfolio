@@ -1,18 +1,22 @@
-import './index.css';
-import { routeTree } from './routeTree.gen.ts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
+import axios from 'axios';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ThemeProvider } from 'theme-provider.tsx';
 import { Parser } from 'web-tree-sitter';
+
+import { api, clearToken } from '@/lib/api';
+
+import { ThemeProvider } from '~/theme-provider.tsx';
+
+import './index.css';
+import { routeTree } from './routeTree.gen.ts';
 
 Parser.init({ locateFile: () => '/tree-sitter.wasm' }).then(() => {
   /* the library is ready */
 });
 
-const router = createRouter({ routeTree });
-const client = new QueryClient({
+const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: Infinity,
@@ -21,6 +25,23 @@ const client = new QueryClient({
     },
   },
 });
+
+const router = createRouter({
+  routeTree,
+  context: { queryClient },
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      clearToken();
+      queryClient.setQueryData(['auth'], false);
+      router.navigate({ to: '/chirp/login' });
+    }
+    return Promise.reject(error);
+  },
+);
 
 declare module '@tanstack/react-router' {
   interface Register {
@@ -33,9 +54,9 @@ if (!rootElement.innerHTML) {
   createRoot(rootElement).render(
     <StrictMode>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <QueryClientProvider client={client}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
       </ThemeProvider>
     </StrictMode>,
   );

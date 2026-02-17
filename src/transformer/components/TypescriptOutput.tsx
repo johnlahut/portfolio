@@ -2,7 +2,8 @@ import { useLoaderData } from '@tanstack/react-router';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { useMemo } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
-import type { LanguageFlag } from 'transformer/types';
+
+import type { LanguageFlag } from '~/transformer/types';
 
 export const TypescriptOutput = ({
   value,

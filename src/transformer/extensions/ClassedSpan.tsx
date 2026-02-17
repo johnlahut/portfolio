@@ -1,4 +1,4 @@
-import { Mark, mergeAttributes } from "@tiptap/react";
+import { Mark, mergeAttributes } from '@tiptap/react';
 
 export const ClassedSpan = Mark.create({
   name: 'classSpan',

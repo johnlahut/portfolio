@@ -1,9 +1,11 @@
-import { Button } from '@/components/ui/button';
-import { InputGroupButton } from '@/components/ui/input-group';
 import clsx from 'clsx';
 import { MinusIcon, PlusIcon } from 'lucide-react';
 import { Controller } from 'react-hook-form';
-import type { TransformerForm } from 'transformer/types';
+
+import { Button } from '@/components/ui/button';
+import { InputGroupButton } from '@/components/ui/input-group';
+
+import type { TransformerForm } from '~/transformer/types';
 
 export const IsOptionalButton = ({ index }: { index: number }) => {
   return (
@@ -30,7 +32,13 @@ export const IsOptionalButton = ({ index }: { index: number }) => {
   );
 };
 
-export const IncrementDimButton = ({ vIndex, tIndex }: { vIndex: number; tIndex: number }) => {
+export const IncrementDimButton = ({
+  vIndex,
+  tIndex,
+}: {
+  vIndex: number;
+  tIndex: number;
+}) => {
   return (
     <Controller<TransformerForm, `parsedItems.${number}.type.${number}.dim`>
       name={`parsedItems.${vIndex}.type.${tIndex}.dim`}
@@ -48,8 +56,13 @@ export const IncrementDimButton = ({ vIndex, tIndex }: { vIndex: number; tIndex:
   );
 };
 
-export const DecrementDimButton = ({ vIndex, tIndex }: { vIndex: number; tIndex: number }) => {
-
+export const DecrementDimButton = ({
+  vIndex,
+  tIndex,
+}: {
+  vIndex: number;
+  tIndex: number;
+}) => {
   return (
     <Controller<TransformerForm, `parsedItems.${number}.type.${number}.dim`>
       name={`parsedItems.${vIndex}.type.${tIndex}.dim`}

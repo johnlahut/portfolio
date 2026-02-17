@@ -1,8 +1,9 @@
-import type { LanguageChoice } from './types';
 import JavaPlugin from 'prettier-plugin-java';
 import BabelPlugin from 'prettier/plugins/babel';
 import EstreePlugin from 'prettier/plugins/estree';
 import TypescriptPlugin from 'prettier/plugins/typescript';
+
+import type { LanguageChoice } from './types';
 
 // https://github.com/wooorm/starry-night?tab=readme-ov-file#languages
 export const LanguageChoices: LanguageChoice[] = [

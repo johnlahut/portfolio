@@ -1,3 +1,8 @@
+import { ChevronDownIcon, PlusIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import React from 'react';
+import { useFieldArray } from 'react-hook-form';
+
 import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group';
 import {
   Command,
@@ -16,17 +21,14 @@ import {
   InputGroupButton,
 } from '@/components/ui/input-group';
 import { Label } from '@/components/ui/label';
-import { ChevronDownIcon, PlusIcon } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import React from 'react';
-import { useFieldArray } from 'react-hook-form';
+
 import {
   DecrementDimButton,
   IncrementDimButton,
-} from 'transformer/form/button';
-import { PropertyTypeInput } from 'transformer/form/input';
-import { TypeMenuList } from 'transformer/form/menu';
-import { type TransformerForm } from 'transformer/types';
+} from '~/transformer/form/button';
+import { PropertyTypeInput } from '~/transformer/form/input';
+import { TypeMenuList } from '~/transformer/form/menu';
+import { type TransformerForm } from '~/transformer/types';
 
 const MotionInputGroup = motion.create(InputGroup);
 const MotionButtonGroupText = motion.create(ButtonGroupText);

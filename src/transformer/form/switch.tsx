@@ -1,8 +1,10 @@
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Switch } from '@/components/ui/switch';
 import clsx from 'clsx';
 import { Controller } from 'react-hook-form';
-import type { TransformerForm } from 'transformer/types';
+
+import { Field, FieldLabel } from '@/components/ui/field';
+import { Switch } from '@/components/ui/switch';
+
+import type { TransformerForm } from '~/transformer/types';
 
 export const ExportSwitch = () => {
   return (

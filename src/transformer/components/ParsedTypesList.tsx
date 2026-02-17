@@ -1,13 +1,16 @@
-import { PropertyTypeInputGroup } from './PropertyTypeInputGroup';
-import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group';
-import { InputGroup, InputGroupAddon } from '@/components/ui/input-group';
-import { Label } from '@/components/ui/label';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo, useMemo } from 'react';
 import { useFieldArray } from 'react-hook-form';
-import { IsOptionalButton } from 'transformer/form/button';
-import { PropertyNameInput } from 'transformer/form/input';
-import type { ResolvedParsedItem, TransformerForm } from 'transformer/types';
+
+import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group';
+import { InputGroup, InputGroupAddon } from '@/components/ui/input-group';
+import { Label } from '@/components/ui/label';
+
+import { IsOptionalButton } from '~/transformer/form/button';
+import { PropertyNameInput } from '~/transformer/form/input';
+import type { ResolvedParsedItem, TransformerForm } from '~/transformer/types';
+
+import { PropertyTypeInputGroup } from './PropertyTypeInputGroup';
 
 const MotionButtonGroupText = motion.create(ButtonGroupText);
 

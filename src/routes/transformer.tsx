@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { FormProvider, useForm } from 'react-hook-form';
-import { TransformerLayout } from 'transformer/layout';
-import { type TransformerForm } from 'transformer/types';
+
+import { TransformerLayout } from '~/transformer/layout';
+import { type TransformerForm } from '~/transformer/types';
 
 export const Route = createFileRoute('/transformer')({
   component: TransformerRoute,
