@@ -36,6 +36,7 @@ app.add_middleware(
         "https://johnlahut.com",
         "https://www.johnlahut.com",
     ],
+    allow_origin_regex=r"https://.*\.portfolio-2ed\.pages\.dev",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
