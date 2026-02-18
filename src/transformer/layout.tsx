@@ -1,4 +1,3 @@
-import { useCopyToClipboard } from 'hooks/use-copy-to-clipboard';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -18,6 +17,8 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
+
+import { useCopyToClipboard } from '~/hooks/use-copy-to-clipboard';
 
 import { AutoGenerator } from './components/AutoGenerator';
 import { ParsedPropertyList } from './components/ParsedTypesList';
