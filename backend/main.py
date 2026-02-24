@@ -1,5 +1,8 @@
 """FastAPI routes - thin HTTP layer."""
 
+import threading
+from contextlib import asynccontextmanager
+
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,17 +10,23 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+import database
+import jobs
 import services
 from exceptions import AuthError, ImageExistsError, SSRFError
 from models import (
     CreatePersonResponse,
+    CreateScrapeJobRequest,
     DetectedFaceUpdate,
     GetImagesResponse,
     GetPeopleResponse,
+    GetScrapeJobsResponse,
     ImageWithFaces,
     PersonInsert,
     ProcessImageRequest,
     ProcessImageResponse,
+    ScrapeJobDetail,
+    ScrapeJobRow,
     ScrapeRequest,
     ScrapeResponse,
     UpdateDetectedFaceRequest,
@@ -25,7 +34,15 @@ from models import (
 
 limiter = Limiter(key_func=get_remote_address)
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    database.cleanup_stale_jobs()
+    database.cleanup_old_jobs()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
@@ -104,9 +121,18 @@ def process_image(req: ProcessImageRequest):
 @app.get(
     "/images", response_model=GetImagesResponse, dependencies=[Depends(require_auth)]
 )
-def get_images():
-    images = services.get_images()
-    return GetImagesResponse(images=images, count=len(images))
+def get_images(
+    limit: int = 40,
+    cursor: str | None = None,
+    sort_person_id: str | None = None,
+    search: str | None = None,
+):
+    return services.get_images(
+        limit=limit,
+        cursor=cursor,
+        sort_person_id=sort_person_id,
+        search=search,
+    )
 
 
 @app.get(
@@ -160,3 +186,61 @@ def update_face_person(face_id: str, req: UpdateDetectedFaceRequest):
     if not result:
         raise HTTPException(status_code=404, detail=f"Face not found: {face_id}")
     return result
+
+
+@app.post(
+    "/scrape-jobs",
+    response_model=ScrapeJobRow,
+    status_code=202,
+    dependencies=[Depends(require_auth)],
+)
+def create_scrape_job(req: CreateScrapeJobRequest):
+    try:
+        job = services.create_scrape_job(str(req.url))
+    except SSRFError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    threading.Thread(target=jobs.run_scrape_job, args=(job.id,), daemon=True).start()
+    return job
+
+
+@app.get(
+    "/scrape-jobs",
+    response_model=GetScrapeJobsResponse,
+    dependencies=[Depends(require_auth)],
+)
+def get_scrape_jobs():
+    return services.get_scrape_jobs()
+
+
+@app.get(
+    "/scrape-jobs/{job_id}",
+    response_model=ScrapeJobDetail,
+    dependencies=[Depends(require_auth)],
+)
+def get_scrape_job(job_id: str):
+    job = services.get_scrape_job_detail(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+    return job
+
+
+@app.post(
+    "/scrape-jobs/{job_id}/retry",
+    response_model=ScrapeJobRow,
+    dependencies=[Depends(require_auth)],
+)
+def retry_scrape_job(job_id: str):
+    job = services.retry_scrape_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=409, detail="Job not found or has no failed items to retry"
+        )
+    threading.Thread(target=jobs.run_scrape_job, args=(job.id,), daemon=True).start()
+    return job
+
+
+@app.delete("/scrape-jobs/{job_id}", dependencies=[Depends(require_auth)])
+def delete_scrape_job(job_id: str):
+    if not services.delete_scrape_job(job_id):
+        raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+    return {"deleted": True}

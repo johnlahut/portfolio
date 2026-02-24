@@ -30,5 +30,5 @@
       "@/*": ["./@/*"]
     }
   },
-  "include": ["src", "@"]
+  "include": ["src", "@", "src/routes/chirp/login.tsx"]
 }

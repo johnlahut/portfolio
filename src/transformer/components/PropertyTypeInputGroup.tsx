@@ -52,7 +52,7 @@ const PropertyTypeInputGroupComponent = ({
             animate={{ opacity: 1, scaleY: 1 }}
             exit={{ opacity: 0, scaleY: 0 }}
             transition={{ duration: 0.2 }}
-            className="w-auto box-content inline-flex"
+            className="box-content inline-flex w-auto"
           >
             <PropertyTypeInput vIndex={fieldIndex} tIndex={index} />
             <InputGroupAddon align={'inline-end'}>
@@ -99,7 +99,10 @@ const PropertyTypeInputGroupComponent = ({
             {index === fields.length - 1 && (
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
-                  className="text-primary hover:bg-primary/10 hover:text-primary"
+                  className="
+                    text-primary
+                    hover:bg-primary/10 hover:text-primary
+                  "
                   onClick={() =>
                     append({
                       tag: 'base',
@@ -109,7 +112,7 @@ const PropertyTypeInputGroupComponent = ({
                     })
                   }
                 >
-                  <PlusIcon className="w-4 h-4" />
+                  <PlusIcon className="size-4" />
                 </InputGroupButton>
               </InputGroupAddon>
             )}
@@ -122,7 +125,7 @@ const PropertyTypeInputGroupComponent = ({
               exit={{ opacity: 0, scaleY: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <Label className="font-mono text-syntax-punctuation p-0.5">
+              <Label className="p-0.5 font-mono text-syntax-punctuation">
                 |
               </Label>
             </MotionButtonGroupText>

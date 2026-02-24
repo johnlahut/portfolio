@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 import { useCreatePerson, usePeople } from '../hooks';
 import type { DetectedFace, Person } from '../types';
 
-type FacePersonSelectProps = {
+type OverlayPersonSelectProps = {
   face: DetectedFace;
   scaleX: number;
   scaleY: number;
@@ -31,14 +31,14 @@ type FacePersonSelectProps = {
   onPersonSelect?: (face: DetectedFace, person: Person | null) => void;
 };
 
-export function FacePersonSelect({
+export function OverlayPersonSelect({
   face,
   scaleX,
   scaleY,
   isOpen,
   onOpenChange,
   onPersonSelect,
-}: FacePersonSelectProps) {
+}: OverlayPersonSelectProps) {
   const { people } = usePeople();
   const { createPerson, createPersonLoading } = useCreatePerson();
   const [isCreating, setIsCreating] = useState(false);
@@ -95,7 +95,7 @@ export function FacePersonSelect({
       </PopoverTrigger>
       <PopoverContent className="w-50 p-0" align="start" side="bottom">
         {isCreating ? (
-          <div className="p-2 space-y-2">
+          <div className="space-y-2 p-2">
             <Input
               placeholder="Enter name..."
               value={newPersonName}
@@ -149,7 +149,7 @@ export function FacePersonSelect({
                 >
                   <Check
                     className={cn(
-                      'mr-2 h-4 w-4',
+                      'mr-2 size-4',
                       !assignedPersonId ? 'opacity-100' : 'opacity-0',
                     )}
                   />
@@ -163,7 +163,7 @@ export function FacePersonSelect({
                   >
                     <Check
                       className={cn(
-                        'mr-2 h-4 w-4',
+                        'mr-2 size-4',
                         assignedPersonId === person.id
                           ? 'opacity-100'
                           : 'opacity-0',
@@ -176,7 +176,7 @@ export function FacePersonSelect({
               <CommandSeparator />
               <CommandGroup>
                 <CommandItem onSelect={() => setIsCreating(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="mr-2 size-4" />
                   Create new person
                 </CommandItem>
               </CommandGroup>

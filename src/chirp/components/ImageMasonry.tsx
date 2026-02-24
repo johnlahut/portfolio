@@ -1,11 +1,10 @@
-import { Link, useSearch } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Pin } from 'lucide-react';
 import {
   useCallback,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -14,170 +13,202 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import { useImages } from '../hooks';
 import type { ImageRecord } from '../types';
-import { FaceOverlayImage } from './FaceOverlayImage';
+import { ImageFaceOverlay } from './ImageWithFaceOverlay';
 
 const COLUMN_WIDTH = 280;
 const GAP = 16;
 const ESTIMATED_HEIGHT = 300;
 
-// Cache measured heights to avoid re-estimation jumps
-// const heightCache = new Map<string, number>();
-
 type ImageMasonryProps = {
   showFaceOverlays?: boolean;
+  sortPersonId?: string;
+  search?: string;
 };
 
 function isTaggedForPerson(image: ImageRecord, personId: string): boolean {
   return image.detected_faces.some((face) => face.person_id === personId);
 }
 
-function getMinDistanceForPerson(
+function estimateImageHeight(
   image: ImageRecord,
-  personId: string,
-): number | null {
-  let minDistance: number | null = null;
-  for (const face of image.detected_faces) {
-    for (const match of face.matched_persons) {
-      if (match.person_id === personId) {
-        if (minDistance === null || match.distance < minDistance) {
-          minDistance = match.distance;
-        }
-      }
-    }
-  }
-  return minDistance;
-}
-
-function estimateImageHeight(image: ImageRecord): number {
+  columnWidth: number = COLUMN_WIDTH,
+): number {
   if (image.width && image.height) {
     const ratio = image.height / image.width;
-    return COLUMN_WIDTH * ratio;
+    return columnWidth * ratio;
   }
   return ESTIMATED_HEIGHT;
 }
 
-export function ImageMasonry({ showFaceOverlays = true }: ImageMasonryProps) {
-  const { images, imagesLoading, imagesError } = useImages();
+function getContentWidth(container: HTMLDivElement): number {
+  const styles = window.getComputedStyle(container);
+  const paddingLeft = Number.parseFloat(styles.paddingLeft) || 0;
+  const paddingRight = Number.parseFloat(styles.paddingRight) || 0;
+  return Math.max(0, container.clientWidth - paddingLeft - paddingRight);
+}
 
-  const { sortBy } = useSearch({ from: '/chirp' });
+export function ImageMasonry({
+  showFaceOverlays = true,
+  sortPersonId,
+  search,
+}: ImageMasonryProps) {
+  const {
+    images,
+    imagesLoading,
+    imagesError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useImages({ sortPersonId, search });
 
-  const [lanes, setLanes] = useState(4);
+  const [layout, setLayout] = useState(() => ({
+    lanes: 3,
+    columnWidth: COLUMN_WIDTH,
+  }));
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
-  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const parentRef = useRef<HTMLDivElement>(null);
 
+  const { lanes, columnWidth } = layout;
   const laneWidth = 100 / lanes;
 
-  const sortedImages = useMemo(() => {
-    const filtered = (images?.images ?? []).filter((img) => img.source_url);
-
-    if (!sortBy) return filtered;
-
-    return [...filtered].sort((a, b) => {
-      // Pin tagged images at the top
-      const taggedA = isTaggedForPerson(a, sortBy);
-      const taggedB = isTaggedForPerson(b, sortBy);
-
-      if (taggedA && !taggedB) return -1;
-      if (!taggedA && taggedB) return 1;
-
-      // Then sort by match distance
-      const distA = getMinDistanceForPerson(a, sortBy);
-      const distB = getMinDistanceForPerson(b, sortBy);
-
-      if (distA === null && distB === null) return 0;
-      if (distA === null) return 1;
-      if (distB === null) return -1;
-      return distA - distB;
-    });
-  }, [images?.images, sortBy]);
+  // +1 for the loader row when there are more pages
+  const virtualCount = hasNextPage ? images.length + 1 : images.length;
 
   const rowVirtualizer = useVirtualizer({
-    count: sortedImages.length,
+    count: virtualCount,
     getScrollElement: () => parentRef.current,
     estimateSize: (index) => {
-      const image = sortedImages[index];
-      return image ? estimateImageHeight(image) + GAP : ESTIMATED_HEIGHT + GAP;
+      const image = images[index];
+      return image
+        ? estimateImageHeight(image, columnWidth) + GAP
+        : ESTIMATED_HEIGHT + GAP;
     },
     overscan: 5,
     lanes,
-    getItemKey: (index) => sortedImages[index].id,
+    getItemKey: (index) => images[index]?.id ?? 'loader',
   });
 
-  // need to re-measure when the order of our images changes (variable heights)
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const lastItem = virtualItems[virtualItems.length - 1];
+
+  // Trigger next page fetch when loader row (or last image) becomes visible.
+  // Use lastItem.index (a number) as the dep — not the array ref — to avoid
+  // running this effect on every render.
+  useEffect(() => {
+    if (!lastItem) return;
+    if (
+      lastItem.index >= images.length - 1 &&
+      hasNextPage &&
+      !isFetchingNextPage
+    ) {
+      fetchNextPage();
+    }
+  }, [lastItem, hasNextPage, isFetchingNextPage, fetchNextPage, images.length]);
+
+  // Recompute estimated sizes when data count or lane width changes.
   useEffect(() => {
     rowVirtualizer.measure();
-  }, [sortedImages, rowVirtualizer]);
+  }, [images.length, columnWidth, lanes, rowVirtualizer]);
 
-  const onImageLoad = useCallback((imageId: string /*index: number*/) => {
+  const onImageLoad = useCallback((imageId: string) => {
     setLoadedImages((prev) => new Set(prev).add(imageId));
   }, []);
 
-  // re-calc lanes when screen width changes
   useLayoutEffect(() => {
-    const updateLanes = () => {
-      if (parentRef.current) {
-        const width = parentRef.current.offsetWidth;
-        const newLanes = Math.max(
-          1,
-          Math.floor((width + GAP) / (COLUMN_WIDTH + GAP)),
-        );
-        setLanes(newLanes);
-      }
+    const parent = parentRef.current;
+    if (!parent) return;
+
+    const updateLayout = () => {
+      const contentWidth = getContentWidth(parent);
+      const lanesFromWidth = Math.max(
+        1,
+        Math.floor((contentWidth + GAP) / (COLUMN_WIDTH + GAP)),
+      );
+      const nextColumnWidth = Math.max(1, contentWidth / lanesFromWidth - GAP);
+
+      setLayout((prev) => {
+        if (
+          prev.lanes === lanesFromWidth &&
+          Math.abs(prev.columnWidth - nextColumnWidth) < 0.5
+        ) {
+          return prev;
+        }
+        return { lanes: lanesFromWidth, columnWidth: nextColumnWidth };
+      });
     };
 
-    updateLanes();
-    window.addEventListener('resize', updateLanes);
-    return () => window.removeEventListener('resize', updateLanes);
+    updateLayout();
+
+    const resizeObserver = new ResizeObserver(updateLayout);
+    resizeObserver.observe(parent);
+
+    return () => resizeObserver.disconnect();
   }, []);
 
-  // loading
   if (imagesLoading) {
-    return <div className="p-4">Loading...</div>;
-  }
+    // Alternating tall/short pattern offset per column so adjacent columns interlock
+    const TALL = 450;
+    const SHORT = 300;
+    const colHeights = (col: number) =>
+      Array.from({ length: 5 }, (_, row) =>
+        (col + row) % 2 === 0 ? TALL : SHORT,
+      );
 
-  // error
-  else if (imagesError) {
-    return <div className="p-4 text-red-500">Error loading images</div>;
-  }
-
-  // empty
-  else if (sortedImages.length === 0) {
     return (
-      <div className="flex items-center justify-center h-48 text-muted-foreground">
+      <div ref={parentRef} className="h-full overflow-auto bg-chirp-grid p-6">
+        <div className="flex gap-4">
+          {Array.from({ length: lanes }, (_, col) => (
+            <div key={col} className="flex flex-1 flex-col gap-4">
+              {colHeights(col).map((h, row) => (
+                <Skeleton
+                  key={row}
+                  className="w-full rounded-[14px] bg-chirp-panel"
+                  style={{ height: h }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (imagesError) {
+    return (
+      <div className="flex items-center justify-center p-12 text-red-400">
+        Error loading images
+      </div>
+    );
+  }
+
+  if (images.length === 0) {
+    return (
+      <div
+        className="
+        flex items-center justify-center p-12 text-chirp-text-faint
+      "
+      >
         No images found.
       </div>
     );
   }
 
-  // happy path
-  else {
-    return (
-      <div ref={parentRef} className="h-full overflow-auto p-1">
-        <div
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            width: '100%',
-            position: 'relative',
-          }}
-        >
-          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const image = sortedImages[virtualRow.index];
-            const isLoaded = loadedImages.has(image.id);
-            // const hasFaces = image.detected_faces.length > 0;
-            const isPinned = sortBy && isTaggedForPerson(image, sortBy);
-
+  return (
+    <div ref={parentRef} className="h-full overflow-auto bg-chirp-grid p-6">
+      <div
+        style={{
+          height: `${rowVirtualizer.getTotalSize()}px`,
+          width: '100%',
+          position: 'relative',
+        }}
+      >
+        {virtualItems.map((virtualRow) => {
+          // Loader row
+          if (virtualRow.index === images.length) {
             return (
               <div
-                key={virtualRow.key}
-                data-index={virtualRow.index}
-                ref={(el) => {
-                  if (el) {
-                    itemRefs.current.set(virtualRow.index, el);
-                    rowVirtualizer.measureElement(el);
-                  }
-                }}
+                key="loader"
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -187,43 +218,85 @@ export function ImageMasonry({ showFaceOverlays = true }: ImageMasonryProps) {
                   paddingBottom: GAP,
                 }}
               >
-                <Link
-                  to="/chirp/image/$imageId"
-                  params={{ imageId: image.id }}
-                  className="block"
-                >
-                  <div
-                    className="relative rounded-lg bg-muted cursor-pointer hover:ring-2 hover:ring-primary transition-all"
-                    style={
-                      !isLoaded && !(image.width && image.height)
-                        ? { minHeight: 200 }
-                        : undefined
-                    }
-                  >
-                    {isPinned && (
-                      <div className="absolute top-2 left-2 z-10 rounded-full bg-primary p-1.5 shadow-md">
-                        <Pin className="h-3.5 w-3.5 text-primary-foreground" />
-                      </div>
-                    )}
-                    {!isLoaded && (
-                      <Skeleton className="absolute inset-0 w-full h-full" />
-                    )}
-                    <FaceOverlayImage
-                      image={image}
-                      showOverlays={showFaceOverlays}
-                      className={`transition-opacity duration-200 ${
-                        isLoaded ? 'opacity-100' : 'opacity-0'
-                      }`}
-                      imgClassName="w-full h-auto block rounded-lg"
-                      onLoad={() => onImageLoad(image.id)}
-                    />
-                  </div>
-                </Link>
+                <Skeleton
+                  className="w-full rounded-[14px] bg-chirp-panel"
+                  style={{ height: ESTIMATED_HEIGHT }}
+                />
               </div>
             );
-          })}
-        </div>
+          }
+
+          const image = images[virtualRow.index];
+          if (!image) return null;
+          const isLoaded = loadedImages.has(image.id);
+          const isPinned =
+            sortPersonId && isTaggedForPerson(image, sortPersonId);
+
+          return (
+            <div
+              key={virtualRow.key}
+              data-index={virtualRow.index}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: `${virtualRow.lane * laneWidth}%`,
+                width: `calc(${laneWidth}% - ${GAP}px)`,
+                transform: `translateY(${virtualRow.start}px)`,
+                paddingBottom: GAP,
+              }}
+            >
+              <Link
+                to="/chirp/gallery/$imageId"
+                params={{ imageId: image.id }}
+                className="group block"
+              >
+                <div
+                  className="
+                    relative cursor-pointer overflow-hidden rounded-[14px]
+                    border border-chirp-border-warm/15
+                    shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-all
+                    hover:border-chirp-border-warm/30
+                    hover:shadow-[0_12px_32px_rgba(0,0,0,0.45)]
+                  "
+                  style={
+                    !isLoaded && !(image.width && image.height)
+                      ? { minHeight: ESTIMATED_HEIGHT }
+                      : undefined
+                  }
+                >
+                  {isPinned && (
+                    <div
+                      className="
+                      absolute top-2.5 left-2.5 z-10 rounded-full
+                      bg-chirp-accent p-1.5 shadow-md
+                    "
+                    >
+                      <Pin className="size-3.5 text-chirp-page" />
+                    </div>
+                  )}
+                  {!isLoaded && (
+                    <Skeleton
+                      className="
+                      absolute inset-0 size-full rounded-[14px] bg-chirp-panel
+                    "
+                    />
+                  )}
+                  <ImageFaceOverlay
+                    image={image}
+                    showOverlays={showFaceOverlays}
+                    className={`
+                      transition-opacity duration-200
+                      ${isLoaded ? 'opacity-100' : 'opacity-0'}
+                    `}
+                    imgClassName="w-full h-auto block rounded-[14px]"
+                    onLoad={() => onImageLoad(image.id)}
+                  />
+                </div>
+              </Link>
+            </div>
+          );
+        })}
       </div>
-    );
-  }
+    </div>
+  );
 }

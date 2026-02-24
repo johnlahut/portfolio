@@ -31,13 +31,22 @@ const router = createRouter({
   context: { queryClient },
 });
 
+let redirectingToLogin = false;
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       clearToken();
       queryClient.setQueryData(['auth'], false);
-      router.navigate({ to: '/chirp/login' });
+      const isOnLoginRoute = router.state.location.pathname === '/chirp/login';
+
+      if (!isOnLoginRoute && !redirectingToLogin) {
+        redirectingToLogin = true;
+        router.navigate({ to: '/chirp/login', replace: true }).finally(() => {
+          redirectingToLogin = false;
+        });
+      }
     }
     return Promise.reject(error);
   },

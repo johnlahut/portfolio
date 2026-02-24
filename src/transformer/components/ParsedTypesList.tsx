@@ -18,7 +18,7 @@ const ParsedPropertyRow = memo(({ fieldIndex }: { fieldIndex: number }) => {
   return (
     <AnimatePresence mode="popLayout" initial={false}>
       <ButtonGroup orientation={'horizontal'} className="ml-3">
-        <InputGroup className="w-auto box-content inline-flex">
+        <InputGroup className="box-content inline-flex w-auto">
           <PropertyNameInput index={fieldIndex} />
 
           <InputGroupAddon align={'inline-end'}>
@@ -33,7 +33,11 @@ const ParsedPropertyRow = memo(({ fieldIndex }: { fieldIndex: number }) => {
           transition={{ duration: 0.2 }}
           asChild
         >
-          <Label className="font-mono text-syntax-punctuation p-0.5 whitespace-pre-wrap">
+          <Label
+            className="
+            p-0.5 font-mono whitespace-pre-wrap text-syntax-punctuation
+          "
+          >
             {': '}
           </Label>
         </MotionButtonGroupText>
@@ -47,7 +51,7 @@ const ParsedPropertyRow = memo(({ fieldIndex }: { fieldIndex: number }) => {
           transition={{ duration: 0.2 }}
           asChild
         >
-          <Label className="font-mono text-syntax-punctuation p-0.5">;</Label>
+          <Label className="p-0.5 font-mono text-syntax-punctuation">;</Label>
         </MotionButtonGroupText>
       </ButtonGroup>
     </AnimatePresence>

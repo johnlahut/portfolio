@@ -72,9 +72,11 @@ Backend linting uses **Ruff** configured in `backend/ruff.toml` (line-length 88,
 ## Deployment
 
 ### Frontend
+
 - **Cloudflare Pages** — auto-deploys from git. Set `VITE_API_URL` env var to the backend service URL.
 
 ### Backend (Google Cloud Run)
+
 - **Docker image** built from `backend/Dockerfile`.
 - `gcloud run deploy chirp-api --source=. --region=us-central1 --memory=2Gi --min-instances=0 --max-instances=2 --port=8080` (run from `backend/`)
 - Required env vars: `SUPABASE_URL`, `SUPABASE_KEY`, `JWT_SECRET` (set via `--set-env-vars` or Cloud Run console).

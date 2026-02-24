@@ -4,15 +4,22 @@ import type {
   CreatePersonResponse,
   GetImagesResponse,
   GetPeopleResponse,
+  GetScrapeJobsResponse,
   ImageRecord,
   ProcessImageRequest,
   ProcessImageResponse,
+  ScrapeJob,
+  ScrapeJobDetail,
   ScrapeResponse,
   UpdateFacePersonResponse,
 } from './types';
 
-export const getImages = () =>
-  api.get<GetImagesResponse>('/images').then((res) => res.data);
+export const getImages = (params?: {
+  limit?: number;
+  cursor?: string;
+  sort_person_id?: string;
+  search?: string;
+}) => api.get<GetImagesResponse>('/images', { params }).then((res) => res.data);
 
 export const scrapeImages = (url: string) =>
   api.post<ScrapeResponse>('/scrape', { url }).then((res) => res.data);
@@ -58,3 +65,18 @@ export const checkAuth = () =>
     .get<{ authenticated: boolean }>('/auth/check')
     .then((res) => res.data.authenticated)
     .catch(() => false);
+
+export const createScrapeJob = (url: string) =>
+  api.post<ScrapeJob>('/scrape-jobs', { url }).then((res) => res.data);
+
+export const getScrapeJobs = () =>
+  api.get<GetScrapeJobsResponse>('/scrape-jobs').then((res) => res.data);
+
+export const getScrapeJob = (jobId: string) =>
+  api.get<ScrapeJobDetail>(`/scrape-jobs/${jobId}`).then((res) => res.data);
+
+export const retryScrapeJob = (jobId: string) =>
+  api.post<ScrapeJob>(`/scrape-jobs/${jobId}/retry`).then((res) => res.data);
+
+export const deleteScrapeJob = (jobId: string) =>
+  api.delete(`/scrape-jobs/${jobId}`).then((res) => res.data);

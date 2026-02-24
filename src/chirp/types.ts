@@ -26,7 +26,7 @@ export type ImageRecord = {
 
 export type GetImagesResponse = {
   images: ImageRecord[];
-  count: number;
+  next_cursor: string | null;
 };
 
 export type ScrapedImage = {
@@ -80,4 +80,50 @@ export type ImageDimensions = {
   displayedWidth: number;
   displayedHeight: number;
   isLoaded: boolean;
+};
+
+export type ScrapeJobStatus =
+  | 'pending'
+  | 'scraping'
+  | 'processing'
+  | 'completed'
+  | 'failed';
+
+export type ScrapeJobItemStatus =
+  | 'queued'
+  | 'processing'
+  | 'completed'
+  | 'skipped'
+  | 'failed';
+
+export type ScrapeJob = {
+  id: string;
+  url: string;
+  status: ScrapeJobStatus;
+  total_images: number | null;
+  processed_count: number;
+  skipped_count: number;
+  failed_count: number;
+  total_faces: number;
+  preview_url: string | null;
+  error: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ScrapeJobItem = {
+  id: string;
+  job_id: string;
+  source_url: string;
+  status: ScrapeJobItemStatus;
+  image_id: string | null;
+  error: string | null;
+};
+
+export type ScrapeJobDetail = ScrapeJob & {
+  items: ScrapeJobItem[];
+};
+
+export type GetScrapeJobsResponse = {
+  jobs: ScrapeJob[];
 };

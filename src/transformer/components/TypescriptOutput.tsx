@@ -12,7 +12,7 @@ export const TypescriptOutput = ({
   value: string;
   flag: LanguageFlag;
 }) => {
-  const starryNight = useLoaderData({ from: '__root__' });
+  const starryNight = useLoaderData({ from: '/transformer' });
 
   const scope = useMemo(
     () => starryNight.flagToScope('ts') ?? flag,
@@ -25,7 +25,7 @@ export const TypescriptOutput = ({
   );
 
   return (
-    <div className="whitespace-pre-wrap font-mono">
+    <div className="font-mono whitespace-pre-wrap">
       {toJsxRuntime(highlighted, {
         Fragment,
         jsx,

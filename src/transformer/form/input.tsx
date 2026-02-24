@@ -12,7 +12,7 @@ export const ObjectNameInput = () => {
       render={({ field }) => (
         <Input
           {...field}
-          className={`font-mono box-content py-0 px-1 text-syntax-entity`}
+          className={`box-content px-1 py-0 font-mono text-syntax-entity`}
           style={{
             width: `${field.value.length}ch`,
           }}
@@ -29,7 +29,7 @@ export const PropertyNameInput = ({ index }: { index: number }) => {
       render={({ field }) => (
         <InputGroupInput
           {...field}
-          className={`font-mono box-content py-0 px-1 text-syntax-variable`}
+          className={`box-content px-1 py-0 font-mono text-syntax-variable`}
           style={{
             width: `${field.value.length}ch`,
           }}
@@ -58,7 +58,7 @@ export const PropertyTypeInput = ({
         <InputGroupInput
           {...field}
           value={field.value + '[]'.repeat(dim)}
-          className={`font-mono box-content py-0 px-1 text-syntax-entity`}
+          className={`box-content px-1 py-0 font-mono text-syntax-entity`}
           style={{
             width: `${field.value?.length + dim * 2}ch`,
           }}
