@@ -75,40 +75,50 @@ def _process_item(item_id: str, source_url: str, job_id: str) -> None:
         log(f"Failed: {source_url[:70]} — {e}")
 
 
-def _execute_job(job_id: str) -> None:
-    """Core job execution (called while _job_lock is held)."""
+def _execute_job(job_id: str, is_retry: bool) -> None:
+    """Core job execution (called while _job_lock is held).
+
+    When is_retry=True, existing queued items from the previous run are reused
+    directly — no re-scrape and no new item rows are inserted.  This prevents
+    duplicate rows and counter accumulation on subsequent retries.
+    """
     try:
         job = database.get_scrape_job(job_id)
         if not job:
             log(f"Job not found: {job_id}")
             return
 
-        log(f"Starting job {job_id}: {job.url}")
+        log(f"{'Retrying' if is_retry else 'Starting'} job {job_id}: {job.url}")
         database.update_scrape_job(ScrapeJobUpdate(id=job_id, status="scraping"))
 
-        images = services.scrape_images(job.url)
-        log(f"Scraped {len(images)} image URLs")
+        if is_retry:
+            # Reuse the items that retry_scrape_job already reset to queued.
+            # Do not re-scrape the URL or insert new rows.
+            items = database.get_queued_scrape_job_items(job_id)
+            log(f"Retry path — reusing {len(items)} queued item(s)")
+            database.update_scrape_job(ScrapeJobUpdate(id=job_id, status="processing"))
+        else:
+            images = services.scrape_images(job.url)
+            log(f"Scraped {len(images)} image URLs")
 
-        if not images:
+            if not images:
+                database.update_scrape_job(
+                    ScrapeJobUpdate(id=job_id, status="completed", total_images=0)
+                )
+                return
+
+            inserts = [
+                ScrapeJobItemInsert(job_id=job_id, source_url=img.src) for img in images
+            ]
+            items = database.bulk_insert_scrape_job_items(inserts)
             database.update_scrape_job(
-                ScrapeJobUpdate(id=job_id, status="completed", total_images=0)
+                ScrapeJobUpdate(
+                    id=job_id,
+                    status="processing",
+                    total_images=len(items),
+                    preview_url=images[0].src,
+                )
             )
-            return
-
-        inserts = [
-            ScrapeJobItemInsert(job_id=job_id, source_url=img.src) for img in images
-        ]
-        items = database.bulk_insert_scrape_job_items(inserts)
-        preview_url = images[0].src
-
-        database.update_scrape_job(
-            ScrapeJobUpdate(
-                id=job_id,
-                status="processing",
-                total_images=len(items),
-                preview_url=preview_url,
-            )
-        )
 
         with ThreadPoolExecutor(max_workers=2) as executor:
             futures = {
@@ -142,7 +152,7 @@ def _execute_job(job_id: str) -> None:
         )
 
 
-def run_scrape_job(job_id: str) -> None:
+def run_scrape_job(job_id: str, is_retry: bool = False) -> None:
     """Try to run a scrape job.
 
     If another job is already running (lock held), this job remains pending
@@ -154,14 +164,15 @@ def run_scrape_job(job_id: str) -> None:
         return
 
     try:
-        _execute_job(job_id)
+        _execute_job(job_id, is_retry=is_retry)
     finally:
         _job_lock.release()
 
     # After releasing, pick up the next pending job if one exists.
+    # Pending jobs picked up this way are always fresh (not retries).
     next_job = database.get_next_pending_job()
     if next_job:
         log(f"Picking up next pending job: {next_job.id}")
         threading.Thread(
-            target=run_scrape_job, args=(next_job.id,), daemon=True
+            target=run_scrape_job, args=(next_job.id, False), daemon=True
         ).start()

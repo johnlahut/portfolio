@@ -209,7 +209,10 @@ def get_all_images(
     client = get_client()
 
     # Parse cursor JSON into individual RPC params
-    cursor_data: dict = json.loads(cursor) if cursor else {}
+    try:
+        cursor_data: dict = json.loads(cursor) if cursor else {}
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid cursor: {e}") from e
     p_cursor_created_at: str | None = cursor_data.get("created_at")
     p_cursor_id: str | None = cursor_data.get("id")
     p_cursor_is_tagged: int | None = cursor_data.get("is_tagged")
@@ -471,6 +474,20 @@ def get_completed_scrape_item_by_url(source_url: str) -> ScrapeJobItemRow | None
     if not result.data:
         return None
     return ScrapeJobItemRow.model_validate(result.data[0])
+
+
+def get_queued_scrape_job_items(job_id: str) -> list[ScrapeJobItemRow]:
+    """Return all queued items for a job, ordered by creation time."""
+    client = get_client()
+    result = (
+        client.table("scrape_job_item")
+        .select("*")
+        .eq("job_id", job_id)
+        .eq("status", "queued")
+        .order("created_at")
+        .execute()
+    )
+    return [ScrapeJobItemRow.model_validate(r) for r in result.data]
 
 
 def reset_failed_job_items(job_id: str) -> int:

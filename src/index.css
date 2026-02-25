@@ -226,6 +226,33 @@
   background-color: var(--destructive);
 }
 
+@keyframes chirp-scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  /* Fast pass takes first 45% of duration, remaining 55% is the inter-loop pause */
+  45% {
+    transform: translateY(800%);
+  }
+  45.1%,
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes chirp-sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  40%,
+  60% {
+    opacity: 0.55;
+    transform: scale(1.1);
+  }
+}
+
 @theme {
   --font-heading: 'Manrope Variable', Manrope, system-ui, sans-serif;
   --font-brand: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', sans-serif;
@@ -233,6 +260,8 @@
   --font-serif: 'Open Sans Variable', sans-serif;
 
   --text-xs: 12px;
+
+  --animate-chirp-scan: chirp-scan 20s linear infinite;
 }
 @theme inline {
   --font-sans: 'Inter Variable', sans-serif;

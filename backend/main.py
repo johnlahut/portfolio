@@ -127,12 +127,15 @@ def get_images(
     sort_person_id: str | None = None,
     search: str | None = None,
 ):
-    return services.get_images(
-        limit=limit,
-        cursor=cursor,
-        sort_person_id=sort_person_id,
-        search=search,
-    )
+    try:
+        return services.get_images(
+            limit=limit,
+            cursor=cursor,
+            sort_person_id=sort_person_id,
+            search=search,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.get(
@@ -199,7 +202,9 @@ def create_scrape_job(req: CreateScrapeJobRequest):
         job = services.create_scrape_job(str(req.url))
     except SSRFError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    threading.Thread(target=jobs.run_scrape_job, args=(job.id,), daemon=True).start()
+    threading.Thread(
+        target=jobs.run_scrape_job, args=(job.id, False), daemon=True
+    ).start()
     return job
 
 
@@ -235,7 +240,9 @@ def retry_scrape_job(job_id: str):
         raise HTTPException(
             status_code=409, detail="Job not found or has no failed items to retry"
         )
-    threading.Thread(target=jobs.run_scrape_job, args=(job.id,), daemon=True).start()
+    threading.Thread(
+        target=jobs.run_scrape_job, args=(job.id, True), daemon=True
+    ).start()
     return job
 
 

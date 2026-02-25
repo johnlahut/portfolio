@@ -78,7 +78,7 @@ export function ImageFaceOverlay({
       />
       {dimensions.isLoaded && image.detected_faces.length > 0 && (
         <svg
-          className="pointer-events-none absolute inset-0 h-full w-full"
+          className="pointer-events-none absolute inset-0 size-full"
           style={{ overflow: 'visible' }}
           viewBox={`0 0 ${dimensions.displayedWidth} ${dimensions.displayedHeight}`}
           preserveAspectRatio="none"
