@@ -69,9 +69,9 @@ export function MobileFilterSheet({
                     ${
                       sortBy === person.id
                         ? `
-                        border-(--chirp-selected-bg)/50
-                        bg-(--chirp-selected-bg)/20 text-(--chirp-selected-fg)
-                      `
+                          border-(--chirp-selected-bg)/50
+                          bg-(--chirp-selected-bg)/20 text-(--chirp-selected-fg)
+                        `
                         : 'border-chirp-border/40 text-chirp-text-body'
                     }
                   `}

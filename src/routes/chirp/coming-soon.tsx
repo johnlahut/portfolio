@@ -40,31 +40,31 @@ function RouteComponent() {
   return (
     <div
       className="
-      relative min-h-screen w-full overflow-hidden bg-chirp-page font-sans
-    "
+        relative min-h-screen w-full overflow-hidden bg-chirp-page font-sans
+      "
     >
       <div className="pointer-events-none absolute inset-0">
         <div
           className="
-          absolute -top-24 -left-24 h-[420px] w-[560px] rounded-full
-          bg-[radial-gradient(ellipse,var(--chirp-accent-start)_0%,transparent_70%)]
-          opacity-20 blur-[2px]
-        "
+            absolute -top-24 -left-24 h-[420px] w-[560px] rounded-full
+            bg-[radial-gradient(ellipse,var(--chirp-accent-start)_0%,transparent_70%)]
+            opacity-20 blur-[2px]
+          "
         />
         <div
           className="
-          absolute top-10 right-8 h-[300px] w-[420px] rounded-full
-          bg-[radial-gradient(ellipse,var(--chirp-border-warm)_0%,transparent_72%)]
-          opacity-[0.12] blur-[2px]
-        "
+            absolute top-10 right-8 h-[300px] w-[420px] rounded-full
+            bg-[radial-gradient(ellipse,var(--chirp-border-warm)_0%,transparent_72%)]
+            opacity-[0.12] blur-[2px]
+          "
         />
         <div
           className="
-          absolute top-2/3 left-1/2 h-[300px] w-[840px] -translate-x-1/2
-          -translate-y-1/2 rounded-full
-          bg-[radial-gradient(ellipse,var(--chirp-border)_0%,transparent_72%)]
-          opacity-15
-        "
+            absolute top-2/3 left-1/2 h-[300px] w-[840px] -translate-x-1/2
+            -translate-y-1/2 rounded-full
+            bg-[radial-gradient(ellipse,var(--chirp-border)_0%,transparent_72%)]
+            opacity-15
+          "
         />
       </div>
 
@@ -81,11 +81,7 @@ function RouteComponent() {
           <Link to="/chirp">
             <div className="flex items-center gap-2.5">
               <ChirpLogo />
-              <span
-                className="
-                font-brand text-[15px] font-semibold text-chirp-text
-              "
-              >
+              <span className="font-brand text-[15px] font-semibold text-chirp-text">
                 Chirp
               </span>
             </div>
@@ -94,10 +90,10 @@ function RouteComponent() {
 
         <main
           className="
-          flex w-full flex-1 flex-col gap-14 px-6 pt-12 pb-16
-          md:px-16
-          lg:flex-row lg:items-center lg:justify-between lg:pt-14
-        "
+            flex w-full flex-1 flex-col gap-14 px-6 pt-12 pb-16
+            md:px-16
+            lg:flex-row lg:items-center lg:justify-between lg:pt-14
+          "
         >
           <section className="flex w-full max-w-[560px] flex-col gap-6">
             <motion.h1
@@ -150,12 +146,12 @@ function RouteComponent() {
               />
               <Button
                 className="
-                h-[42px] rounded-[10px] border border-chirp-border-warm/45
-                bg-linear-[135deg] from-chirp-accent-start to-chirp-accent-end
-                px-5 text-sm font-semibold text-chirp-page
-                hover:opacity-90
-                sm:w-[132px]
-              "
+                  h-[42px] rounded-[10px] border border-chirp-border-warm/45
+                  bg-linear-[135deg] from-chirp-accent-start to-chirp-accent-end
+                  px-5 text-sm font-semibold text-chirp-page
+                  hover:opacity-90
+                  sm:w-[132px]
+                "
               >
                 Notify me
               </Button>
@@ -182,9 +178,9 @@ function RouteComponent() {
             >
               <div
                 className="
-                h-full w-[70%] rounded-full bg-linear-[90deg]
-                from-chirp-accent-start to-chirp-accent-end
-              "
+                  h-full w-[70%] rounded-full bg-linear-[90deg]
+                  from-chirp-accent-start to-chirp-accent-end
+                "
               />
             </motion.div>
 
@@ -202,10 +198,10 @@ function RouteComponent() {
           <section className="relative h-[420px] w-full max-w-[640px]">
             <div
               className="
-              absolute top-[42px] left-[70px] h-[320px] w-[420px] rounded-full
-              bg-[radial-gradient(circle,var(--chirp-accent)_0%,transparent_72%)]
-              opacity-25
-            "
+                absolute top-[42px] left-[70px] h-[320px] w-[420px] rounded-full
+                bg-[radial-gradient(circle,var(--chirp-accent)_0%,transparent_72%)]
+                opacity-25
+              "
             />
 
             {PREVIEW_CARDS.map((card, i) => (

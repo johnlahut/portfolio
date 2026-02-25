@@ -112,10 +112,10 @@ function RouteComponent() {
         {/* ── Desktop Header ── */}
         <header
           className="
-          hidden h-16 shrink-0 items-center justify-between border-b
-          border-chirp-border/50 bg-chirp-panel px-8
-          lg:flex
-        "
+            hidden h-16 shrink-0 items-center justify-between border-b
+            border-chirp-border/50 bg-chirp-panel px-8
+            lg:flex
+          "
         >
           <div className="flex items-center gap-3">
             <h1 className="font-brand text-xl font-bold text-chirp-text">
@@ -123,8 +123,8 @@ function RouteComponent() {
             </h1>
             <Badge
               className="
-              border-chirp-border/30 bg-chirp-surface text-chirp-text-body
-            "
+                border-chirp-border/30 bg-chirp-surface text-chirp-text-body
+              "
             >
               Photos
             </Badge>
@@ -132,9 +132,9 @@ function RouteComponent() {
           <div className="flex items-center gap-2">
             <div
               className="
-              flex h-9 w-60 items-center gap-2 rounded-lg border
-              border-chirp-border/28 bg-[#262126] px-3
-            "
+                flex h-9 w-60 items-center gap-2 rounded-lg border
+                border-chirp-border/28 bg-[#262126] px-3
+              "
             >
               <Search size={16} className="text-chirp-text-faint" />
               <input
@@ -150,10 +150,10 @@ function RouteComponent() {
             <Link to="/chirp/upload">
               <Button
                 className="
-                h-9 gap-1.5 rounded-lg border border-chirp-border-warm/32
-                text-sm font-semibold text-white bg-chirp-gradient
-                hover:opacity-90
-              "
+                  h-9 gap-1.5 rounded-lg border border-chirp-border-warm/32
+                  text-sm font-semibold text-white bg-chirp-gradient
+                  hover:opacity-90
+                "
               >
                 <Upload size={14} />
                 Upload
@@ -165,10 +165,10 @@ function RouteComponent() {
         {/* ── Desktop Filter Bar ── */}
         <div
           className="
-          hidden h-11 shrink-0 items-center justify-between border-b
-          border-chirp-border/50 bg-[#151318] px-6
-          lg:flex
-        "
+            hidden h-11 shrink-0 items-center justify-between border-b
+            border-chirp-border/50 bg-[#151318] px-6
+            lg:flex
+          "
         >
           <div className="flex items-center gap-2">
             <AddPersonDialog />
@@ -213,10 +213,10 @@ function RouteComponent() {
         {/* ── Mobile Top Bar ── */}
         <header
           className="
-          flex h-16 shrink-0 items-center justify-between border-b
-          border-chirp-border/50 bg-chirp-panel px-4
-          lg:hidden
-        "
+            flex h-16 shrink-0 items-center justify-between border-b
+            border-chirp-border/50 bg-chirp-panel px-4
+            lg:hidden
+          "
         >
           <div className="flex items-center gap-2">
             <ChirpLogo />
@@ -241,10 +241,10 @@ function RouteComponent() {
         {/* ── Mobile Search Row ── */}
         <div
           className="
-          flex h-[52px] shrink-0 items-center gap-2 border-b
-          border-chirp-border/50 px-3
-          lg:hidden
-        "
+            flex h-[52px] shrink-0 items-center gap-2 border-b
+            border-chirp-border/50 px-3
+            lg:hidden
+          "
         >
           <Search size={16} className="text-chirp-text-faint" />
           <input
@@ -261,10 +261,10 @@ function RouteComponent() {
         {/* ── Mobile Filter Chips ── */}
         <div
           className="
-          flex h-[50px] shrink-0 items-center gap-2 overflow-x-auto border-b
-          border-chirp-border/50 px-3
-          lg:hidden
-        "
+            flex h-[50px] shrink-0 items-center gap-2 overflow-x-auto border-b
+            border-chirp-border/50 px-3
+            lg:hidden
+          "
         >
           {selectedPeople.map((person) => (
             <PersonChip
@@ -283,10 +283,10 @@ function RouteComponent() {
         {/* ── Mobile Utility Row ── */}
         <div
           className="
-          flex h-11 shrink-0 items-center justify-between border-b
-          border-chirp-border/50 px-3
-          lg:hidden
-        "
+            flex h-11 shrink-0 items-center justify-between border-b
+            border-chirp-border/50 px-3
+            lg:hidden
+          "
         >
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-chirp-text-body">

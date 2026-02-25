@@ -26,9 +26,7 @@ export function PersonChip({
         `,
         size === 'md'
           ? 'h-8 py-1 pr-3 pl-1 text-sm'
-          : `
-          h-[30px] py-1 pr-2.5 pl-1 text-sm
-        `,
+          : `h-[30px] py-1 pr-2.5 pl-1 text-sm`,
         className,
       )}
     >

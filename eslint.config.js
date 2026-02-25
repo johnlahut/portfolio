@@ -22,6 +22,10 @@ export default defineConfig([
         entryPoint: 'src/index.css',
       },
     },
+    rules: {
+      // Prettier owns line-wrapping — disable the rule that fights it
+      'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,

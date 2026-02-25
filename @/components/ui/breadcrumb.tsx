@@ -20,10 +20,7 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
     <ol
       data-slot="breadcrumb-list"
       className={cn(
-        `
-          flex flex-wrap items-center gap-1.5 text-xs/relaxed wrap-break-word
-          text-muted-foreground
-        `,
+        "text-muted-foreground gap-1.5 text-xs/relaxed flex flex-wrap items-center break-words",
         className
       )}
       {...props}
@@ -35,7 +32,7 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
   return (
     <li
       data-slot="breadcrumb-item"
-      className={cn("inline-flex items-center gap-1", className)}
+      className={cn("gap-1 inline-flex items-center", className)}
       {...props}
     />
   )
@@ -53,10 +50,7 @@ function BreadcrumbLink({
   return (
     <Comp
       data-slot="breadcrumb-link"
-      className={cn(`
-        transition-colors
-        hover:text-foreground
-      `, className)}
+      className={cn("hover:text-foreground transition-colors", className)}
       {...props}
     />
   )
@@ -69,7 +63,7 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
       role="link"
       aria-disabled="true"
       aria-current="page"
-      className={cn("font-normal text-foreground", className)}
+      className={cn("text-foreground font-normal", className)}
       {...props}
     />
   )
@@ -106,10 +100,7 @@ function BreadcrumbEllipsis({
       role="presentation"
       aria-hidden="true"
       className={cn(
-        `
-          flex size-4 items-center justify-center
-          [&>svg]:size-3.5
-        `,
+        "size-4 [&>svg]:size-3.5 flex items-center justify-center",
         className
       )}
       {...props}

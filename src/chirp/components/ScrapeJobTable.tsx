@@ -32,8 +32,8 @@ export function ScrapeJobTable({
     return (
       <div
         className="
-        flex flex-col items-center justify-center py-20 text-chirp-text-dim
-      "
+          flex flex-col items-center justify-center py-20 text-chirp-text-dim
+        "
       >
         <p className="text-sm">No scrape jobs yet.</p>
         <p className="mt-1 text-xs text-chirp-text-faint">
@@ -48,9 +48,9 @@ export function ScrapeJobTable({
       <TableHeader className="bg-chirp-panel">
         <TableRow
           className="
-          border-chirp-border/20
-          hover:bg-transparent
-        "
+            border-chirp-border/20
+            hover:bg-transparent
+          "
         >
           <TableHead className="w-16 px-4 text-chirp-text-muted">
             Preview
@@ -94,9 +94,9 @@ export function ScrapeJobTable({
               ) : (
                 <div
                   className="
-                  h-10 w-14 rounded-lg border border-chirp-border/30
-                  bg-chirp-surface
-                "
+                    h-10 w-14 rounded-lg border border-chirp-border/30
+                    bg-chirp-surface
+                  "
                 />
               )}
             </TableCell>

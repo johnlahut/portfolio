@@ -37,10 +37,10 @@ function RouteComponent() {
     <Dialog open onOpenChange={(open) => !open && handleClose()}>
       <DialogContent
         className="
-        flex max-h-[calc(100vh-2rem)] w-auto max-w-[calc(100vw-2rem)] flex-col
-        overflow-visible border-chirp-border/40 bg-chirp-panel p-0
-        sm:max-w-[calc(100vw-2rem)]
-      "
+          flex max-h-[calc(100vh-2rem)] w-auto max-w-[calc(100vw-2rem)] flex-col
+          overflow-visible border-chirp-border/40 bg-chirp-panel p-0
+          sm:max-w-[calc(100vw-2rem)]
+        "
       >
         {/* Overlay toggle */}
         {image?.detected_faces && image.detected_faces.length > 0 && (
@@ -63,8 +63,8 @@ function RouteComponent() {
         {/* Image */}
         <div
           className="
-          flex flex-1 items-center justify-center overflow-visible px-4 py-8
-        "
+            flex flex-1 items-center justify-center overflow-visible px-4 py-8
+          "
         >
           {imageLoading ? (
             <span className="text-chirp-text-muted">Loading...</span>
@@ -96,10 +96,10 @@ function RouteComponent() {
         {image && (
           <DialogFooter
             className="
-            border-t border-chirp-border/30 px-4 pt-3 pb-4 text-sm
-            text-chirp-text
-            sm:justify-between
-          "
+              border-t border-chirp-border/30 px-4 pt-3 pb-4 text-sm
+              text-chirp-text
+              sm:justify-between
+            "
           >
             <div className="flex items-center gap-3">
               <span className="font-medium">

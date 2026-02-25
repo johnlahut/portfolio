@@ -37,32 +37,20 @@ export function GallerySidebar({
   return (
     <aside
       className="
-      hidden w-64 shrink-0 flex-col border-r border-chirp-border/25
-      bg-chirp-sidebar p-2
-      lg:flex
-    "
+        hidden w-64 shrink-0 flex-col border-r border-chirp-border/25
+        bg-chirp-sidebar p-2
+        lg:flex
+      "
     >
       {/* Brand header */}
       <Link to="/chirp">
-        <div
-          className="
-          flex items-center justify-between rounded-md bg-chirp-panel p-2
-        "
-        >
-          <div className="flex items-center gap-2">
-            <ChirpLogo />
-            <div className="flex flex-col">
-              <span
-                className="
-                font-brand text-base/tight font-bold text-chirp-text
-              "
-              >
-                Chirp
-              </span>
-              <span className="text-xs text-chirp-text-body">
-                Daycare Photos
-              </span>
-            </div>
+        <div className="flex items-center gap-2 rounded-md bg-chirp-panel p-2">
+          <ChirpLogo />
+          <div className="flex flex-col">
+            <span className="font-brand text-base/tight font-bold text-chirp-text">
+              Chirp
+            </span>
+            <span className="text-xs text-chirp-text-body">Daycare Photos</span>
           </div>
         </div>
       </Link>
@@ -92,8 +80,8 @@ export function GallerySidebar({
           <>
             <span
               className="
-              mt-4 px-2 py-1.5 text-xs font-medium text-chirp-text-dim
-            "
+                mt-4 px-2 py-1.5 text-xs font-medium text-chirp-text-dim
+              "
             >
               People Filters
             </span>

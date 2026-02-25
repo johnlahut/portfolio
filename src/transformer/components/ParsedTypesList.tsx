@@ -35,8 +35,8 @@ const ParsedPropertyRow = memo(({ fieldIndex }: { fieldIndex: number }) => {
         >
           <Label
             className="
-            p-0.5 font-mono whitespace-pre-wrap text-syntax-punctuation
-          "
+              p-0.5 font-mono whitespace-pre-wrap text-syntax-punctuation
+            "
           >
             {': '}
           </Label>

@@ -61,11 +61,11 @@ export function ImageMasonry({
     fetchNextPage,
   } = useImages({ sortPersonId, search });
 
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
   const [layout, setLayout] = useState(() => ({
     lanes: 3,
     columnWidth: COLUMN_WIDTH,
   }));
-  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -92,9 +92,7 @@ export function ImageMasonry({
   const virtualItems = rowVirtualizer.getVirtualItems();
   const lastItem = virtualItems[virtualItems.length - 1];
 
-  // Trigger next page fetch when loader row (or last image) becomes visible.
-  // Use lastItem.index (a number) as the dep — not the array ref — to avoid
-  // running this effect on every render.
+  // Trigger next page fetch when loader row (or last image) becomes visible
   useEffect(() => {
     if (!lastItem) return;
     if (
@@ -267,9 +265,9 @@ export function ImageMasonry({
                   {isPinned && (
                     <div
                       className="
-                      absolute top-2.5 left-2.5 z-10 rounded-full
-                      bg-chirp-accent p-1.5 shadow-md
-                    "
+                        absolute top-2.5 left-2.5 z-10 rounded-full
+                        bg-chirp-accent p-1.5 shadow-md
+                      "
                     >
                       <Pin className="size-3.5 text-chirp-page" />
                     </div>
@@ -277,8 +275,8 @@ export function ImageMasonry({
                   {!isLoaded && (
                     <Skeleton
                       className="
-                      absolute inset-0 size-full rounded-[14px] bg-chirp-panel
-                    "
+                        absolute inset-0 size-full rounded-[14px] bg-chirp-panel
+                      "
                     />
                   )}
                   <ImageFaceOverlay

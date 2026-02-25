@@ -69,10 +69,10 @@ function RouteComponent() {
         {/* Header */}
         <header
           className="
-          hidden h-16 shrink-0 items-center justify-between border-b
-          border-chirp-border/50 bg-chirp-panel px-8
-          lg:flex
-        "
+            hidden h-16 shrink-0 items-center justify-between border-b
+            border-chirp-border/50 bg-chirp-panel px-8
+            lg:flex
+          "
         >
           <div>
             <h1 className="font-brand text-xl font-bold text-chirp-text">
@@ -87,17 +87,17 @@ function RouteComponent() {
         {/* URL input bar */}
         <div
           className="
-          shrink-0 border-b border-chirp-border/50 bg-[#151318] px-8 py-4
-        "
+            shrink-0 border-b border-chirp-border/50 bg-[#151318] px-8 py-4
+          "
         >
           <div className="flex gap-2">
             <Link to="/chirp/gallery">
               <Button
                 variant={'ghost'}
                 className="
-                h-9 text-sm
-                lg:hidden
-              "
+                  h-9 text-sm
+                  lg:hidden
+                "
               >
                 <ArrowLeft size={14} />
                 Back
@@ -143,31 +143,27 @@ function RouteComponent() {
             <div className="mt-3 flex items-center gap-2">
               <Badge
                 className="
-                border-chirp-border/30 bg-chirp-surface text-chirp-text-body
-              "
+                  border-chirp-border/30 bg-chirp-surface text-chirp-text-body
+                "
               >
                 {jobs.length} {jobs.length === 1 ? 'job' : 'jobs'}
               </Badge>
               {activeJobs > 0 && (
-                <Badge
-                  className="
-                  border-amber-400/36 bg-[#382916] text-amber-300
-                "
-                >
+                <Badge className="border-amber-400/36 bg-[#382916] text-amber-300">
                   {activeJobs} active
                 </Badge>
               )}
               <Badge
                 className="
-                border-chirp-border/30 bg-chirp-surface text-chirp-text-body
-              "
+                  border-chirp-border/30 bg-chirp-surface text-chirp-text-body
+                "
               >
                 {totalImages} images
               </Badge>
               <Badge
                 className="
-                border-chirp-border/30 bg-chirp-surface text-chirp-text-body
-              "
+                  border-chirp-border/30 bg-chirp-surface text-chirp-text-body
+                "
               >
                 {totalFaces} faces
               </Badge>

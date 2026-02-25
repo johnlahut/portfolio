@@ -32,36 +32,37 @@ function LoginComponent() {
   return (
     <div
       className="
-      relative flex min-h-screen w-full items-center justify-center
-      overflow-hidden bg-chirp-page
-    "
+        relative flex min-h-screen w-full items-center justify-center
+        overflow-hidden bg-chirp-page
+      "
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 z-0">
         <div className="relative mx-auto w-full max-w-7xl">
           <div
             className="
-            absolute -top-[60px] -left-[100px] h-[400px] w-[500px] rounded-full
-            bg-[radial-gradient(ellipse,rgba(230,162,106,0.08)_0%,transparent_70%)]
-          "
+              absolute -top-[60px] -left-[100px] h-[400px] w-[500px]
+              rounded-full
+              bg-[radial-gradient(ellipse,rgba(230,162,106,0.08)_0%,transparent_70%)]
+            "
           />
           <div
             className="
-            absolute -top-[40px] right-[80px] hidden h-[350px] w-[450px]
-            rounded-full
-            bg-[radial-gradient(ellipse,rgba(230,162,106,0.06)_0%,transparent_70%)]
-            lg:block
-          "
+              absolute -top-[40px] right-[80px] hidden h-[350px] w-[450px]
+              rounded-full
+              bg-[radial-gradient(ellipse,rgba(230,162,106,0.06)_0%,transparent_70%)]
+              lg:block
+            "
           />
         </div>
       </div>
       {/* Card */}
       <div
         className="
-        relative z-10 flex w-full max-w-[420px] flex-col gap-7 rounded-[20px]
-        border border-chirp-border-warm/25
-        bg-[linear-gradient(145deg,#312A26,#2A2421_55%,#25201D)] p-11
-        shadow-[0_14px_36px_-6px_rgba(0,0,0,0.36)]
-      "
+          relative z-10 flex w-full max-w-[420px] flex-col gap-7 rounded-[20px]
+          border border-chirp-border-warm/25
+          bg-[linear-gradient(145deg,#312A26,#2A2421_55%,#25201D)] p-11
+          shadow-[0_14px_36px_-6px_rgba(0,0,0,0.36)]
+        "
       >
         {/* Brand */}
         <div className="flex flex-col items-center gap-3">

@@ -25,8 +25,6 @@ type Feature = {
   iconClass: string;
   iconBg: string;
   title: string;
-  titleGradient: string;
-  borderColor: string;
   bgGradient: string;
   description: string;
 };
@@ -61,8 +59,6 @@ const FEATURES: Feature[] = [
     iconClass: 'text-[#FF8F5E]',
     iconBg: 'bg-[#E08B5A2E]',
     title: 'Smart Tagging',
-    titleGradient: 'from-[#FFBE92] to-[#FFE7CF]',
-    borderColor: 'border-chirp-border-warm/20',
     bgGradient:
       'bg-[linear-gradient(160deg,var(--chirp-card),var(--chirp-surface))]',
     description:
@@ -73,8 +69,6 @@ const FEATURES: Feature[] = [
     iconClass: 'text-[#C084FC]',
     iconBg: 'bg-[#D8A36D2B]',
     title: 'Instant Updates',
-    titleGradient: 'from-[#F0C793] to-[#FFE7CF]',
-    borderColor: 'border-chirp-border-warm/20',
     bgGradient:
       'bg-[linear-gradient(160deg,var(--chirp-card),var(--chirp-surface))]',
     description:
@@ -85,8 +79,6 @@ const FEATURES: Feature[] = [
     iconClass: 'text-[#4ADE80]',
     iconBg: 'bg-[#83B6902E]',
     title: 'Privacy First',
-    titleGradient: 'from-[#9BCB95] to-[#E9F6E2]',
-    borderColor: 'border-chirp-border-green/20',
     bgGradient:
       'bg-[linear-gradient(160deg,var(--chirp-card),var(--chirp-surface))]',
     description:
@@ -110,9 +102,9 @@ export function ChirpLandingPage() {
   return (
     <div
       className="
-      relative mx-auto min-h-screen w-full max-w-7xl overflow-x-hidden
-      bg-chirp-page font-sans
-    "
+        relative mx-auto min-h-screen w-full max-w-7xl overflow-x-hidden
+        bg-chirp-page font-sans
+      "
     >
       {/* ── Navbar ───────────────────────────────────────────────── */}
       <motion.nav
@@ -136,11 +128,11 @@ export function ChirpLandingPage() {
         <Link to="/chirp/login">
           <Button
             className="
-            h-auto rounded-full border-0 bg-linear-[135deg]
-            from-chirp-accent-start to-chirp-accent-end px-6 py-2.5 text-sm
-            font-semibold text-white
-            hover:opacity-90
-          "
+              h-auto rounded-full border-0 bg-linear-[135deg]
+              from-chirp-accent-start to-chirp-accent-end px-6 py-2.5 text-sm
+              font-semibold text-white
+              hover:opacity-90
+            "
           >
             Log in
           </Button>
@@ -150,19 +142,19 @@ export function ChirpLandingPage() {
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section
         className="
-        flex min-h-0 w-full flex-col items-center gap-10 px-5 py-10
-        md:min-h-[620px] md:flex-row md:items-center md:gap-[60px] md:px-20
-        md:py-[60px]
-      "
+          flex min-h-0 w-full flex-col items-center gap-10 px-5 py-10
+          md:min-h-[620px] md:flex-row md:items-center md:gap-[60px] md:px-20
+          md:py-[60px]
+        "
       >
         {/* Left content */}
         <div className="flex min-w-0 flex-1 flex-col gap-8">
           {/* Headlines */}
           <div
             className="
-            flex w-full flex-col
-            md:w-min md:whitespace-nowrap
-          "
+              flex w-full flex-col
+              md:w-min md:whitespace-nowrap
+            "
           >
             <motion.h1
               initial={{ opacity: 0, x: -30 }}
@@ -221,11 +213,11 @@ export function ChirpLandingPage() {
             <Link to="/chirp/gallery">
               <Button
                 className="
-                h-auto gap-2 rounded-full border-0 bg-linear-[135deg]
-                from-chirp-accent-start to-chirp-accent-end px-7 py-3.5
-                text-[15px] font-bold text-white
-                hover:opacity-90
-              "
+                  h-auto gap-2 rounded-full border-0 bg-linear-[135deg]
+                  from-chirp-accent-start to-chirp-accent-end px-7 py-3.5
+                  text-[15px] font-bold text-white
+                  hover:opacity-90
+                "
               >
                 Start Your Chirp
                 <ArrowRight size={16} />
@@ -243,9 +235,9 @@ export function ChirpLandingPage() {
               >
                 <span
                   className="
-                  inline-flex size-5 shrink-0 items-center justify-center
-                  rounded-full bg-linear-[135deg] from-[#7C3AED] to-[#FF6B35]
-                "
+                    inline-flex size-5 shrink-0 items-center justify-center
+                    rounded-full bg-linear-[135deg] from-[#7C3AED] to-[#FF6B35]
+                  "
                 >
                   <Play size={10} fill="#fff" className="text-white" />
                 </span>
@@ -258,17 +250,17 @@ export function ChirpLandingPage() {
         {/* Right: Hero visual */}
         <div
           className="
-          relative hidden h-[500px] w-[430px] shrink-0
-          lg:block
-        "
+            relative hidden h-[500px] w-[430px] shrink-0
+            lg:block
+          "
         >
           {/* Glow */}
           <div
             className="
-            pointer-events-none absolute top-[100px] left-[110px] size-[300px]
-            rounded-full
-            bg-[radial-gradient(ellipse,var(--chirp-accent)_0%,transparent)]
-          "
+              pointer-events-none absolute top-[100px] left-[110px] size-[300px]
+              rounded-full
+              bg-[radial-gradient(ellipse,var(--chirp-accent)_0%,transparent)]
+            "
           />
 
           {/* Photo cards */}
@@ -309,19 +301,19 @@ export function ChirpLandingPage() {
       {/* ── Divider ──────────────────────────────────────────────── */}
       <Separator
         className="
-        h-px w-full
-        bg-[linear-gradient(90deg,transparent,var(--chirp-accent)_34%,#F0C071_56%,#D78D60_76%,transparent)]
-      "
+          h-px w-full
+          bg-[linear-gradient(90deg,transparent,var(--chirp-accent)_34%,#F0C071_56%,#D78D60_76%,transparent)]
+        "
       />
 
       {/* ── Features ─────────────────────────────────────────────── */}
       <section
         className="
-        flex w-full flex-col items-center gap-10
-        bg-[linear-gradient(180deg,var(--chirp-section),var(--chirp-section-mid)_50%,var(--chirp-section))]
-        px-5 py-14
-        md:gap-[60px] md:p-20
-      "
+          flex w-full flex-col items-center gap-10
+          bg-[linear-gradient(180deg,var(--chirp-section),var(--chirp-section-mid)_50%,var(--chirp-section))]
+          px-5 py-14
+          md:gap-[60px] md:p-20
+        "
       >
         {/* Header */}
         <motion.div
@@ -333,18 +325,18 @@ export function ChirpLandingPage() {
         >
           <h2
             className="
-            m-0 bg-linear-to-l from-chirp-text via-chirp-border-warm
-            to-chirp-accent-end bg-clip-text text-center font-heading
-            text-[28px] font-extrabold tracking-[-1px] text-transparent
-            md:text-[44px]
-          "
+              m-0 bg-linear-to-l from-chirp-text via-chirp-border-warm
+              to-chirp-accent-end bg-clip-text text-center font-heading
+              text-[28px] font-extrabold tracking-[-1px] text-transparent
+              md:text-[44px]
+            "
           >
             Why daycares love Chirp
           </h2>
           <p
             className="
-            m-0 text-center text-base leading-[1.6] text-chirp-text-body
-          "
+              m-0 text-center text-base leading-[1.6] text-chirp-text-body
+            "
           >
             Designed for busy staff and anxious parents alike. We handle the
             memories so
@@ -356,9 +348,9 @@ export function ChirpLandingPage() {
         {/* Cards */}
         <div
           className="
-          flex w-full flex-col gap-6
-          md:flex-row
-        "
+            flex w-full flex-col gap-6
+            md:flex-row
+          "
         >
           {FEATURES.map((feature, i) => (
             <motion.div
@@ -373,9 +365,8 @@ export function ChirpLandingPage() {
                 className={`
                   ring-0
                   ${feature.bgGradient}
-                  gap-0 overflow-visible rounded-2xl border
-                  ${feature.borderColor}
-                  h-full p-0 text-base
+                  h-full gap-0 overflow-visible rounded-2xl border
+                  border-chirp-border-warm/25 p-0 text-base
                 `}
               >
                 <CardContent className="flex flex-col gap-5 p-8">
@@ -389,19 +380,13 @@ export function ChirpLandingPage() {
                   </div>
                   <CardTitle
                     className={`
-                      bg-linear-to-b
-                      ${feature.titleGradient}
-                      bg-clip-text font-heading text-[22px] font-extrabold
-                      text-transparent
+                      bg-linear-to-t from-[#FFBE92] to-[#FFE7CF] bg-clip-text
+                      font-heading text-[22px] font-extrabold text-transparent
                     `}
                   >
                     {feature.title}
                   </CardTitle>
-                  <CardDescription
-                    className="
-                    text-sm leading-[1.6] text-chirp-text-muted
-                  "
-                  >
+                  <CardDescription className="text-sm leading-[1.6] text-chirp-text-muted">
                     {feature.description}
                   </CardDescription>
                 </CardContent>
@@ -414,11 +399,11 @@ export function ChirpLandingPage() {
       {/* ── CTA ──────────────────────────────────────────────────── */}
       <section
         className="
-        flex w-full flex-col items-center
-        bg-[linear-gradient(180deg,var(--chirp-section),var(--chirp-section-mid))]
-        px-5 py-10
-        md:px-20
-      "
+          flex w-full flex-col items-center
+          bg-[linear-gradient(180deg,var(--chirp-section),var(--chirp-section-mid))]
+          px-5 py-10
+          md:px-20
+        "
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
@@ -429,45 +414,45 @@ export function ChirpLandingPage() {
         >
           <Card
             className="
-            flex w-full flex-col items-center gap-6 overflow-visible rounded-3xl
-            border border-chirp-border-warm/18
-            bg-[linear-gradient(135deg,#4A2F27,#5B3428_52%,#3F2E25)] p-0
-            text-base ring-0
-          "
+              flex w-full flex-col items-center gap-6 overflow-visible
+              rounded-3xl border border-chirp-border-warm/18
+              bg-[linear-gradient(135deg,#4A2F27,#5B3428_52%,#3F2E25)] p-0
+              text-base ring-0
+            "
           >
             <CardContent
               className="
-              flex flex-col items-center gap-6 px-6 py-10
-              md:px-20 md:py-16
-            "
+                flex flex-col items-center gap-6 px-6 py-10
+                md:px-20 md:py-16
+              "
             >
               <h2
                 className="
-                m-0 bg-linear-to-b from-[#FFC59A] via-[#F6CF9B] to-[#FDE6BF]
-                bg-clip-text text-center font-heading text-[26px] font-extrabold
-                tracking-[-0.5px] text-transparent
-                md:text-[40px]
-              "
+                  m-0 bg-linear-to-b from-[#FFC59A] via-[#F6CF9B] to-[#FDE6BF]
+                  bg-clip-text text-center font-heading text-[26px]
+                  font-extrabold tracking-[-0.5px] text-transparent
+                  md:text-[40px]
+                "
               >
                 Ready to capture the joy?
               </h2>
               <p
                 className="
-                m-0 text-center text-base leading-[1.6] text-chirp-text-body
-              "
+                  m-0 text-center text-base leading-[1.6] text-chirp-text-body
+                "
               >
                 Join modern daycares transforming how they share
                 <br />
                 memories with families.
               </p>
-              <Link to="/chirp/coming-soon">
+              <Link to="/chirp/gallery">
                 <Button
                   className="
-                  h-auto rounded-full border-0 bg-linear-[135deg]
-                  from-chirp-accent-start to-chirp-accent-end px-8 py-4
-                  text-base font-bold text-white
-                  hover:opacity-90
-                "
+                    h-auto rounded-full border-0 bg-linear-[135deg]
+                    from-chirp-accent-start to-chirp-accent-end px-8 py-4
+                    text-base font-bold text-white
+                    hover:opacity-90
+                  "
                 >
                   Get Started for Free
                 </Button>
