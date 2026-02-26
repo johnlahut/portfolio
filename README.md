@@ -43,13 +43,13 @@ The backend requires a `.env` file in `backend/` with `SUPABASE_URL`, `SUPABASE_
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start frontend dev server (port 5173) |
-| `npm run build` | Type-check + production build |
-| `npm run lint` | ESLint |
-| `npm run format` | Prettier auto-format |
-| `npm run backend:lint` | Ruff lint check |
-| `npm run backend:format` | Ruff auto-format |
+| Command                  | Description                           |
+| ------------------------ | ------------------------------------- |
+| `npm run dev`            | Start frontend dev server (port 5173) |
+| `npm run build`          | Type-check + production build         |
+| `npm run lint`           | ESLint                                |
+| `npm run format`         | Prettier auto-format                  |
+| `npm run backend:lint`   | Ruff lint check                       |
+| `npm run backend:format` | Ruff auto-format                      |
 
 Pre-commit hooks (Husky + lint-staged) run ESLint/Prettier on `*.{ts,tsx}` and Ruff on `*.py` automatically.

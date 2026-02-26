@@ -6,10 +6,10 @@ import { cn } from '@/lib/utils';
 
 import type { DetectedFace, ImageRecord, Person } from '../types';
 import { FaceBoundingBox } from './FaceBoundingBox';
-import { FacePersonSelect } from './FacePersonSelect';
+import { OverlayPersonSelect } from './OverlayPersonSelect';
 import { useImageDimensions } from './hooks/useImageDimensions';
 
-type FaceOverlayImageProps = {
+type ImageFaceOverlayProps = {
   image: ImageRecord;
   showOverlays?: boolean;
   className?: string;
@@ -20,7 +20,7 @@ type FaceOverlayImageProps = {
   enablePersonSelect?: boolean;
 };
 
-export function FaceOverlayImage({
+export function ImageFaceOverlay({
   image,
   showOverlays = true,
   className,
@@ -29,7 +29,7 @@ export function FaceOverlayImage({
   onLoad,
   onPersonSelect,
   enablePersonSelect = false,
-}: FaceOverlayImageProps) {
+}: ImageFaceOverlayProps) {
   const { imageRef, dimensions, handleImageLoad } = useImageDimensions();
   const [popoverFace, setPopoverFace] = useState<DetectedFace | null>(null);
   const [hoveredFaceId, setHoveredFaceId] = useState<string | null>(null);
@@ -68,7 +68,7 @@ export function FaceOverlayImage({
           handleImageLoad();
           onLoad?.();
         }}
-        className={imgClassName ?? 'w-full h-auto block'}
+        className={imgClassName ?? 'block h-auto w-full'}
         style={{
           ...(image.width && image.height
             ? { aspectRatio: `${image.width} / ${image.height}` }
@@ -78,7 +78,7 @@ export function FaceOverlayImage({
       />
       {dimensions.isLoaded && image.detected_faces.length > 0 && (
         <svg
-          className="absolute inset-0 w-full h-full pointer-events-none"
+          className="pointer-events-none absolute inset-0 size-full"
           style={{ overflow: 'visible' }}
           viewBox={`0 0 ${dimensions.displayedWidth} ${dimensions.displayedHeight}`}
           preserveAspectRatio="none"
@@ -104,7 +104,7 @@ export function FaceOverlayImage({
         </svg>
       )}
       {popoverFace && (
-        <FacePersonSelect
+        <OverlayPersonSelect
           face={popoverFace}
           scaleX={scaleX}
           scaleY={scaleY}

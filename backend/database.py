@@ -1,6 +1,8 @@
 """Supabase database operations."""
 
+import json
 import os
+from datetime import datetime, timedelta, timezone
 
 from dotenv import load_dotenv
 from supabase import Client, ClientOptions, create_client
@@ -17,6 +19,12 @@ from models import (
     PersonDelete,
     PersonMatch,
     PersonRow,
+    ScrapeJobDetail,
+    ScrapeJobItemInsert,
+    ScrapeJobItemRow,
+    ScrapeJobItemUpdate,
+    ScrapeJobRow,
+    ScrapeJobUpdate,
 )
 
 load_dotenv()
@@ -177,54 +185,97 @@ def delete_image(image_id: str) -> bool:
 
 
 def get_all_images(
+    limit: int = 40,
+    cursor: str | None = None,
+    sort_person_id: str | None = None,
+    search: str | None = None,
     person_match_threshold: float = 0.5,
     person_match_top_n: int = 3,
-) -> list[ImageWithFaces]:
-    """Get all images from the database with their detected faces and person matches.
+) -> tuple[list[ImageWithFaces], str | None]:
+    """Fetch a page of images with cursor-based pagination.
 
     Args:
+        limit: Maximum number of images to return per page (default 40)
+        cursor: Opaque JSON cursor string from a previous response (default None = first page)
+        sort_person_id: UUID of a person to sort by (tagged first, then by match distance)
+        search: Filter images by source_url or filename (case-insensitive substring match)
         person_match_threshold: Maximum cosine distance for person matching (default 0.5)
         person_match_top_n: Number of closest person matches to return per face (default 3)
 
     Returns:
-        List of ImageRecords with detected faces including matched_persons
+        Tuple of (images, next_cursor). next_cursor is None when there are no more pages.
     """
-    log("Fetching all images with detected faces and person matches")
+    log(f"Fetching images page (limit={limit}, cursor={'set' if cursor else 'none'})")
     client = get_client()
 
-    # Supabase has a 1000 row limit per request, so we need to paginate
-    all_rows: list[ImageWithPersonMatchRow] = []
-    page_size = 1000
-    offset = 0
+    # Parse cursor JSON into individual RPC params
+    try:
+        cursor_data: dict = json.loads(cursor) if cursor else {}
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid cursor: {e}") from e
+    p_cursor_created_at: str | None = cursor_data.get("created_at")
+    p_cursor_id: str | None = cursor_data.get("id")
+    p_cursor_is_tagged: int | None = cursor_data.get("is_tagged")
+    p_cursor_min_distance: float | None = cursor_data.get("min_distance")
 
-    while True:
-        result = (
-            client.rpc(
-                "get_all_images_with_person_matches",
-                {
-                    "p_threshold": person_match_threshold,
-                    "p_top_n": person_match_top_n,
-                },
-            )
-            .range(offset, offset + page_size - 1)
-            .execute()
-        )
+    result = client.rpc(
+        "get_all_images_with_person_matches",
+        {
+            "p_threshold": person_match_threshold,
+            "p_top_n": person_match_top_n,
+            "p_limit": limit,
+            "p_cursor_created_at": p_cursor_created_at,
+            "p_cursor_id": p_cursor_id,
+            "p_sort_person_id": sort_person_id,
+            "p_cursor_is_tagged": p_cursor_is_tagged,
+            "p_cursor_min_distance": p_cursor_min_distance,
+            "p_search": search if search else None,
+        },
+    ).execute()
 
-        if not isinstance(result.data, list):
-            break
-        rows = [ImageWithPersonMatchRow.model_validate(r) for r in result.data]
-        all_rows.extend(rows)
-        log(f"Fetched {len(rows)} rows (offset={offset}, total={len(all_rows)})")
+    if not isinstance(result.data, list):
+        log("No data returned from RPC")
+        return [], None
 
-        if len(rows) < page_size:
-            break
-        offset += page_size
+    rows = [ImageWithPersonMatchRow.model_validate(r) for r in result.data]
+    log(f"Got {len(rows)} rows from RPC")
 
-    log(f"Got {len(all_rows)} total rows from RPC")
+    # Track sort fields per image (first occurrence) for cursor building
+    sort_fields_by_image: dict[str, dict] = {}
+    for row in rows:
+        if row.image_id not in sort_fields_by_image:
+            sort_fields_by_image[row.image_id] = {
+                "created_at": row.created_at.isoformat() if row.created_at else None,
+                "is_tagged": row.sort_is_tagged,
+                "min_distance": row.sort_min_distance,
+            }
 
-    images = _build_image_records(all_rows)
-    log(f"Found {len(images)} images")
-    return images
+    images = _build_image_records(rows)
+    log(f"Built {len(images)} image records")
+
+    # Determine next_cursor from the extra row (RPC fetches limit + 1 internally)
+    next_cursor: str | None = None
+    if len(images) > limit:
+        extra = images[limit]
+        extra_sort = sort_fields_by_image[extra.id]
+        if sort_person_id:
+            cursor_obj = {
+                "id": extra.id,
+                "is_tagged": extra_sort["is_tagged"],
+                "min_distance": extra_sort["min_distance"],
+            }
+        else:
+            cursor_obj = {
+                "id": extra.id,
+                "created_at": extra_sort["created_at"],
+            }
+        next_cursor = json.dumps(cursor_obj)
+        images = images[:limit]
+
+    log(
+        f"Returning {len(images)} images, next_cursor={'set' if next_cursor else 'none'}"
+    )
+    return images, next_cursor
 
 
 def save_detected_face(face: DetectedFaceInsert) -> DetectedFaceRow:
@@ -318,3 +369,191 @@ def update_detected_face_person(face: DetectedFaceUpdate) -> bool:
     else:
         log(f"Face not found: {face.face_id}")
     return updated
+
+
+# ── Scrape job CRUD ──────────────────────────────────────────────────────────
+
+
+def create_scrape_job(url: str) -> ScrapeJobRow:
+    """Insert a new scrape_job row in pending status."""
+    log(f"Creating scrape job for: {url[:80]}")
+    client = get_client()
+    result = client.table("scrape_job").insert({"url": url}).execute()
+    row = ScrapeJobRow.model_validate(result.data[0])
+    log(f"Scrape job created: {row.id}")
+    return row
+
+
+def get_scrape_jobs() -> list[ScrapeJobRow]:
+    """Return all scrape jobs ordered by created_at descending."""
+    log("Fetching all scrape jobs")
+    client = get_client()
+    result = (
+        client.table("scrape_job").select("*").order("created_at", desc=True).execute()
+    )
+    return [ScrapeJobRow.model_validate(r) for r in result.data]
+
+
+def get_scrape_job(job_id: str) -> ScrapeJobRow | None:
+    """Return a single scrape_job row, or None if not found."""
+    client = get_client()
+    result = client.table("scrape_job").select("*").eq("id", job_id).execute()
+    if not result.data:
+        return None
+    return ScrapeJobRow.model_validate(result.data[0])
+
+
+def get_scrape_job_detail(job_id: str) -> ScrapeJobDetail | None:
+    """Return a scrape job with its item rows."""
+    job = get_scrape_job(job_id)
+    if not job:
+        return None
+    client = get_client()
+    items_result = (
+        client.table("scrape_job_item")
+        .select("*")
+        .eq("job_id", job_id)
+        .order("created_at")
+        .execute()
+    )
+    items = [ScrapeJobItemRow.model_validate(r) for r in items_result.data]
+    return ScrapeJobDetail(**job.model_dump(), items=items)
+
+
+def update_scrape_job(update: ScrapeJobUpdate) -> None:
+    """Update fields on a scrape_job row (always bumps updated_at)."""
+    fields = update.model_dump(exclude_unset=True, exclude={"id"})
+    fields["updated_at"] = datetime.now(timezone.utc).isoformat()
+    client = get_client()
+    client.table("scrape_job").update(fields).eq("id", update.id).execute()
+
+
+_ALLOWED_INCREMENT_COLUMNS = frozenset(
+    {"processed_count", "skipped_count", "failed_count", "total_faces"}
+)
+
+
+def increment_scrape_job(job_id: str, column: str, amount: int = 1) -> None:
+    """Atomically increment a counter column via the SQL RPC function."""
+    if column not in _ALLOWED_INCREMENT_COLUMNS:
+        raise ValueError(f"Invalid column: {column!r}")
+    client = get_client()
+    client.rpc(
+        "increment_scrape_job",
+        {"p_job_id": job_id, "p_column": column, "p_amount": amount},
+    ).execute()
+
+
+def bulk_insert_scrape_job_items(
+    items: list[ScrapeJobItemInsert],
+) -> list[ScrapeJobItemRow]:
+    """Insert scrape_job_item rows and return the created rows."""
+    if not items:
+        return []
+    client = get_client()
+    rows = [item.model_dump() for item in items]
+    result = client.table("scrape_job_item").insert(rows).execute()
+    return [ScrapeJobItemRow.model_validate(r) for r in result.data]
+
+
+def update_scrape_job_item(update: ScrapeJobItemUpdate) -> None:
+    """Update fields on a scrape_job_item row."""
+    fields = update.model_dump(exclude_unset=True, exclude={"id"})
+    client = get_client()
+    client.table("scrape_job_item").update(fields).eq("id", update.id).execute()
+
+
+def get_completed_scrape_item_by_url(source_url: str) -> ScrapeJobItemRow | None:
+    """Return any completed scrape_job_item for this source URL, or None.
+
+    Used to determine if an image was previously processed to completion so
+    retries can skip it rather than re-processing.
+    """
+    client = get_client()
+    result = (
+        client.table("scrape_job_item")
+        .select("*")
+        .eq("source_url", source_url)
+        .eq("status", "completed")
+        .limit(1)
+        .execute()
+    )
+    if not result.data:
+        return None
+    return ScrapeJobItemRow.model_validate(result.data[0])
+
+
+def get_queued_scrape_job_items(job_id: str) -> list[ScrapeJobItemRow]:
+    """Return all queued items for a job, ordered by creation time."""
+    client = get_client()
+    result = (
+        client.table("scrape_job_item")
+        .select("*")
+        .eq("job_id", job_id)
+        .eq("status", "queued")
+        .order("created_at")
+        .execute()
+    )
+    return [ScrapeJobItemRow.model_validate(r) for r in result.data]
+
+
+def reset_failed_job_items(job_id: str) -> int:
+    """Reset all failed items to queued. Returns the count reset."""
+    client = get_client()
+    result = (
+        client.table("scrape_job_item")
+        .update({"status": "queued", "error": None})
+        .eq("job_id", job_id)
+        .eq("status", "failed")
+        .execute()
+    )
+    return len(result.data)
+
+
+def get_next_pending_job() -> ScrapeJobRow | None:
+    """Return the oldest pending or retry_pending job, or None if none exist."""
+    client = get_client()
+    result = (
+        client.table("scrape_job")
+        .select("*")
+        .in_("status", ["pending", "retry_pending"])
+        .order("created_at")
+        .limit(1)
+        .execute()
+    )
+    if not result.data:
+        return None
+    return ScrapeJobRow.model_validate(result.data[0])
+
+
+def delete_scrape_job(job_id: str) -> bool:
+    """Delete a scrape job (cascades to items). Returns True if deleted."""
+    client = get_client()
+    result = client.table("scrape_job").delete().eq("id", job_id).execute()
+    return len(result.data) > 0
+
+
+def cleanup_stale_jobs() -> None:
+    """Mark jobs stuck in scraping/processing as failed (e.g. after restart)."""
+    log("Cleaning up stale scrape jobs")
+    now = datetime.now(timezone.utc).isoformat()
+    client = get_client()
+    for status in ("scraping", "processing"):
+        client.table("scrape_job").update(
+            {
+                "status": "failed",
+                "error": "Server restarted — use Retry to resume",
+                "updated_at": now,
+            }
+        ).eq("status", status).execute()
+
+
+def cleanup_old_jobs() -> None:
+    """Delete terminal jobs older than 7 days."""
+    log("Cleaning up old scrape jobs (>7 days)")
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+    client = get_client()
+    for status in ("completed", "failed"):
+        client.table("scrape_job").delete().eq("status", status).lt(
+            "created_at", cutoff
+        ).execute()

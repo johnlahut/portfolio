@@ -1,4 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { common, createStarryNight } from '@wooorm/starry-night';
+import tsxGrammar from '@wooorm/starry-night/source.tsx';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { TransformerLayout } from '~/transformer/layout';
@@ -6,6 +8,7 @@ import { type TransformerForm } from '~/transformer/types';
 
 export const Route = createFileRoute('/transformer')({
   component: TransformerRoute,
+  loader: async () => await createStarryNight([...common, tsxGrammar]),
 });
 
 const useTransformerForm = () => {

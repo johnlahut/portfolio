@@ -2,8 +2,18 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '@fontsource-variable/inter';
+@import '@fontsource-variable/manrope';
+@import '@fontsource-variable/plus-jakarta-sans';
 
 @custom-variant dark (&:is(.dark *));
+
+@utility bg-chirp-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--chirp-accent-start),
+    var(--chirp-accent-end)
+  );
+}
 
 @utility text-syntax-keyword {
   @apply text-(--syntax-keyword);
@@ -97,6 +107,51 @@
   --syntax-constant: var(
     --syntax-string
   ); /* Treat constants like strings/primitives */
+
+  /* ── Chirp ──────────────────────────────────────────────── */
+
+  /* Gallery app surfaces (cool dark) */
+  --chirp-bg: #19171b;
+  --chirp-sidebar: #141316;
+  --chirp-panel: #18161a;
+  --chirp-grid: #131116;
+
+  /* Landing page surfaces (warm dark) */
+  --chirp-page: #242325;
+  --chirp-surface: #2a2421;
+  --chirp-section: #2e2d31;
+  --chirp-section-mid: #343238;
+  --chirp-card: #342a25;
+
+  /* Brand accent (warm orange) */
+  --chirp-accent: #e6a26a;
+  --chirp-accent-start: #d97745;
+  --chirp-accent-end: #f2b36f;
+
+  /* Text hierarchy */
+  --chirp-text: #f5ebdd;
+  --chirp-text-body: #d5bfaa;
+  --chirp-text-muted: #c8ad94;
+  --chirp-text-dim: #bfa993;
+  --chirp-text-faint: #927d69;
+
+  /* Borders */
+  --chirp-border: #6c5647;
+  --chirp-border-warm: #e6b47a;
+  --chirp-border-green: #9dc489;
+
+  /* Form / input surface */
+  --chirp-input-bg: #1f1a17;
+
+  /* Mobile bottom sheet surface */
+  --chirp-sheet-bg: #1b181d;
+
+  /* Scan beam sparkle highlight (cream-white glow core) */
+  --chirp-scan-sparkle: #fef3c7;
+
+  /* Person chip / selection accent */
+  --chirp-selected-bg: #7c3aed;
+  --chirp-selected-fg: #ffffff;
 }
 
 .dark {
@@ -174,11 +229,42 @@
   background-color: var(--destructive);
 }
 
+@keyframes chirp-scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  /* Fast pass takes first 45% of duration, remaining 55% is the inter-loop pause */
+  45% {
+    transform: translateY(800%);
+  }
+  45.1%,
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes chirp-sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  40%,
+  60% {
+    opacity: 0.55;
+    transform: scale(1.1);
+  }
+}
+
 @theme {
+  --font-heading: 'Manrope Variable', Manrope, system-ui, sans-serif;
+  --font-brand: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', sans-serif;
   --font-mono: Menlo, 'IBM Plex Mono', monospace;
   --font-serif: 'Open Sans Variable', sans-serif;
 
   --text-xs: 12px;
+
+  --animate-chirp-scan: chirp-scan 20s linear infinite;
 }
 @theme inline {
   --font-sans: 'Inter Variable', sans-serif;
@@ -220,6 +306,30 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+}
+
+/* Chirp Landing Page — Tailwind color tokens */
+@theme inline {
+  --color-chirp-bg: var(--chirp-bg);
+  --color-chirp-sidebar: var(--chirp-sidebar);
+  --color-chirp-panel: var(--chirp-panel);
+  --color-chirp-grid: var(--chirp-grid);
+  --color-chirp-page: var(--chirp-page);
+  --color-chirp-surface: var(--chirp-surface);
+  --color-chirp-section: var(--chirp-section);
+  --color-chirp-section-mid: var(--chirp-section-mid);
+  --color-chirp-card: var(--chirp-card);
+  --color-chirp-accent: var(--chirp-accent);
+  --color-chirp-accent-start: var(--chirp-accent-start);
+  --color-chirp-accent-end: var(--chirp-accent-end);
+  --color-chirp-text: var(--chirp-text);
+  --color-chirp-text-body: var(--chirp-text-body);
+  --color-chirp-text-muted: var(--chirp-text-muted);
+  --color-chirp-text-dim: var(--chirp-text-dim);
+  --color-chirp-text-faint: var(--chirp-text-faint);
+  --color-chirp-border: var(--chirp-border);
+  --color-chirp-border-warm: var(--chirp-border-warm);
+  --color-chirp-border-green: var(--chirp-border-green);
 }
 
 @layer base {

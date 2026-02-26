@@ -25,14 +25,20 @@ from models import (
     DetectedFaceInsert,
     DetectedFaceUpdate,
     FaceLocation,
+    GetImagesResponse,
+    GetScrapeJobsResponse,
     ImageInfo,
     ImageInsert,
+    ImageRow,
     ImageWithFaces,
     PersonDelete,
     PersonRow,
     ProcessedFace,
     ProcessImageRequest,
     ProcessImageResponse,
+    ScrapeJobDetail,
+    ScrapeJobRow,
+    ScrapeJobUpdate,
 )
 
 Image.MAX_IMAGE_PIXELS = 25_000_000  # ~25 megapixels, prevents decompression bombs
@@ -55,6 +61,14 @@ def log(message: str) -> None:
     print(f"[services] {message}")
 
 
+# Hostnames that must be blocked regardless of what IP they resolve to.
+# Covers GCP metadata service and its numeric alias.
+_BLOCKED_HOSTNAMES = frozenset({"metadata.google.internal", "169.254.169.254"})
+
+MAX_REDIRECTS = 5
+MAX_DOWNLOAD_SIZE = 50 * 1024 * 1024  # 50 MB
+
+
 def validate_url(url: str | HttpUrl) -> str:
     """Validate a URL is safe to fetch (not targeting private/internal addresses).
 
@@ -64,23 +78,71 @@ def validate_url(url: str | HttpUrl) -> str:
     parsed = urlparse(str(url))
 
     if parsed.scheme not in ("http", "https"):
-        raise SSRFError(f"Blocked scheme: {parsed.scheme}")
+        raise SSRFError("Blocked scheme")
 
     hostname = parsed.hostname
     if not hostname:
         raise SSRFError("Missing hostname")
 
+    if hostname.lower() in _BLOCKED_HOSTNAMES:
+        raise SSRFError("Blocked hostname")
+
     try:
         addr_infos = socket.getaddrinfo(hostname, None)
     except socket.gaierror:
-        raise SSRFError(f"Cannot resolve hostname: {hostname}")
+        raise SSRFError("Cannot resolve hostname")
 
     for addr_info in addr_infos:
         ip = ipaddress.ip_address(addr_info[4][0])
-        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
-            raise SSRFError(f"Blocked address: {ip}")
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_reserved
+            or ip.is_multicast
+            or ip.is_unspecified
+        ):
+            raise SSRFError("Blocked address")
 
     return str(url)
+
+
+def _safe_request(url: str) -> tuple[str, bytes]:
+    """SSRF-safe HTTP GET with redirect validation and download size cap.
+
+    - Validates the initial URL and every redirect hop via validate_url.
+    - Never follows a redirect without re-checking the destination.
+    - Caps the response body at MAX_DOWNLOAD_SIZE (50 MB).
+
+    Returns (final_url, body_bytes).
+    Raises SSRFError, ValueError, or requests.HTTPError on failure.
+    """
+    current_url = validate_url(url)
+    for _ in range(MAX_REDIRECTS):
+        response = requests.get(
+            current_url, timeout=10, allow_redirects=False, stream=True
+        )
+        if response.status_code in (301, 302, 303, 307, 308):
+            location = response.headers.get("Location")
+            if not location:
+                raise SSRFError("Redirect with no Location header")
+            # Re-validate the redirect target before following it.
+            current_url = validate_url(urljoin(current_url, location))
+            continue
+        response.raise_for_status()
+        # Stream body with size cap.
+        declared = response.headers.get("content-length")
+        if declared and int(declared) > MAX_DOWNLOAD_SIZE:
+            raise ValueError("Response too large")
+        downloaded = 0
+        chunks: list[bytes] = []
+        for chunk in response.iter_content(8192):
+            downloaded += len(chunk)
+            if downloaded > MAX_DOWNLOAD_SIZE:
+                raise ValueError("Response too large")
+            chunks.append(chunk)
+        return current_url, b"".join(chunks)
+    raise SSRFError("Too many redirects")
 
 
 def _facial_area_to_location(facial_area: dict) -> FaceLocation:
@@ -145,27 +207,38 @@ def _detect_faces(image_path_or_array) -> list[FaceLocation]:
     return [face.location for face in faces]
 
 
-def get_images() -> list[ImageWithFaces]:
-    """Get all images from the database."""
-    log("Fetching all images")
-    return database.get_all_images()
+def get_images(
+    limit: int = 40,
+    cursor: str | None = None,
+    sort_person_id: str | None = None,
+    search: str | None = None,
+) -> GetImagesResponse:
+    """Get a page of images from the database."""
+    log(
+        f"Fetching images page (limit={limit}, sort_person_id={sort_person_id}, search={search})"
+    )
+    images, next_cursor = database.get_all_images(
+        limit=limit,
+        cursor=cursor,
+        sort_person_id=sort_person_id,
+        search=search,
+    )
+    return GetImagesResponse(images=images, next_cursor=next_cursor)
 
 
 def scrape_images(url: str | HttpUrl) -> list[ImageInfo]:
     """Fetch a URL and extract all image sources."""
-    safe_url = validate_url(url)
-    log(f"Scraping images from: {safe_url}")
-    response = requests.get(safe_url, timeout=10)
-    response.raise_for_status()
+    log(f"Scraping images from: {url}")
+    final_url, body = _safe_request(str(url))
 
-    soup = BeautifulSoup(response.text, "html.parser")
+    soup = BeautifulSoup(body.decode("utf-8", errors="replace"), "html.parser")
     images: list[ImageInfo] = []
 
     for img in soup.find_all("img"):
         src = img.get("src")
         if not src:
             continue
-        absolute_src = urljoin(safe_url, src)
+        absolute_src = urljoin(final_url, src)
         images.append(ImageInfo(src=absolute_src, alt=img.get("alt")))
 
     log(f"Found {len(images)} images")
@@ -175,10 +248,8 @@ def scrape_images(url: str | HttpUrl) -> list[ImageInfo]:
 def load_image_from_url(url: str) -> str:
     """Download an image from URL and return the URL (DeepFace can load URLs directly)."""
     log(f"Downloading image from: {url}")
-    # Verify URL is accessible
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
-    log(f"Downloaded {len(response.content)} bytes")
+    _, body = _safe_request(url)
+    log(f"Downloaded {len(body)} bytes")
     return url
 
 
@@ -248,38 +319,52 @@ def detect_and_tag_faces(filepath: str, output_path: str | None = None) -> dict:
     return {"faces": faces, "output_path": output_path}
 
 
+def _download_image(url: str) -> tuple[np.ndarray, int, int]:
+    """Download an image from URL and return (rgb_array, width, height)."""
+    log(f"Downloading image from: {url}")
+    _, body = _safe_request(url)
+    pil_image = Image.open(BytesIO(body))
+    width, height = pil_image.size
+    log(f"Image dimensions: {width}x{height}")
+    if pil_image.mode != "RGB":
+        pil_image = pil_image.convert("RGB")
+    return np.array(pil_image), width, height
+
+
+def _save_faces(image_id: str, faces: list[ProcessedFace]) -> list[DetectedFaceInfo]:
+    """Persist detected faces for an image. Returns DetectedFaceInfo list."""
+    saved: list[DetectedFaceInfo] = []
+    for i, face in enumerate(faces):
+        log(f"Saving face {i + 1}/{len(faces)} for image {image_id}")
+        face_record = database.save_detected_face(
+            face=DetectedFaceInsert(
+                image_id=image_id,
+                encoding=face.embedding,
+                **face.location.model_dump(),
+            )
+        )
+        saved.append(DetectedFaceInfo(id=face_record.id, **face.location.model_dump()))
+    return saved
+
+
 def detect_and_save_face(req: ProcessImageRequest) -> ProcessImageResponse:
     """Detect faces in an image and save to database."""
     log(f"Processing image: {req.source_url}")
 
-    # Validate and convert URL
     source_url = validate_url(req.source_url) if req.source_url else None
 
-    # Check if image already exists before running expensive detection
     if source_url:
         existing = database.get_image_by_source_url(source_url)
         if existing:
             raise ImageExistsError(f"Image already exists: {existing.id}")
 
-    # Download image once - get dimensions and prepare for face detection
     width: int | None = None
     height: int | None = None
-    image_for_detection = source_url  # Default to URL for DeepFace
+    image_for_detection = source_url
 
     if source_url:
-        log(f"Downloading image from: {source_url}")
-        response = requests.get(source_url, timeout=10)
-        response.raise_for_status()
-        pil_image = Image.open(BytesIO(response.content))
-        width, height = pil_image.size
-        log(f"Image dimensions: {width}x{height}")
+        image_for_detection, width, height = _download_image(source_url)
 
-        # Convert to RGB numpy array for DeepFace
-        if pil_image.mode != "RGB":
-            pil_image = pil_image.convert("RGB")
-        image_for_detection = np.array(pil_image)
-
-    # Detect faces and extract encodings
     faces = _detect_and_encode_faces(image_for_detection)
 
     log("Saving image record to database")
@@ -293,23 +378,7 @@ def detect_and_save_face(req: ProcessImageRequest) -> ProcessImageResponse:
     )
     log(f"Image saved with id: {image_record.id}")
 
-    saved_faces = []
-    for i, face in enumerate(faces):
-        log(f"Saving face {i + 1}/{len(faces)} to database")
-        face_record = database.save_detected_face(
-            face=DetectedFaceInsert(
-                image_id=image_record.id,
-                embedding=face.embedding,
-                location=face.location,
-            )
-        )
-        saved_faces.append(
-            DetectedFaceInfo(
-                id=face_record.id,
-                **face.location.model_dump(),
-            )
-        )
-
+    saved_faces = _save_faces(image_record.id, faces)
     log(f"Processing complete: {len(saved_faces)} face(s) saved")
     return ProcessImageResponse(
         image_id=image_record.id,
@@ -381,6 +450,67 @@ def verify_password(password: str) -> str:
         JWT_SECRET,
         algorithm=JWT_ALGORITHM,
     )
+
+
+def detect_and_link_faces(
+    image: ImageRow, source_url: str, filename: str
+) -> ProcessImageResponse:
+    """Detect faces for an existing image record and save them.
+
+    Used when the image row was already saved (e.g. a prior partial failure)
+    but face detection did not complete.
+    """
+    log(f"Re-detecting faces for existing image {image.id}: {source_url}")
+    image_array, _, _ = _download_image(source_url)
+    faces = _detect_and_encode_faces(image_array)
+    saved_faces = _save_faces(image.id, faces)
+    log(f"Re-linked {len(saved_faces)} face(s) to image {image.id}")
+    return ProcessImageResponse(
+        image_id=image.id,
+        filename=filename,
+        faces=saved_faces,
+        face_count=len(saved_faces),
+    )
+
+
+def create_scrape_job(url: str) -> ScrapeJobRow:
+    """Create a new scrape job record."""
+    log(f"Creating scrape job for: {url[:80]}")
+    return database.create_scrape_job(url)
+
+
+def get_scrape_jobs() -> GetScrapeJobsResponse:
+    """Return all scrape jobs."""
+    log("Fetching scrape jobs")
+    jobs = database.get_scrape_jobs()
+    return GetScrapeJobsResponse(jobs=jobs)
+
+
+def get_scrape_job_detail(job_id: str) -> ScrapeJobDetail | None:
+    """Return a scrape job with its items, or None if not found."""
+    log(f"Fetching scrape job detail: {job_id}")
+    return database.get_scrape_job_detail(job_id)
+
+
+def retry_scrape_job(job_id: str) -> ScrapeJobRow | None:
+    """Reset failed items and re-queue the job. Returns None if not retryable."""
+    log(f"Retrying scrape job: {job_id}")
+    job = database.get_scrape_job(job_id)
+    if not job or job.status not in ("failed", "completed"):
+        return None
+    count = database.reset_failed_job_items(job_id)
+    if count == 0:
+        return None
+    database.update_scrape_job(
+        ScrapeJobUpdate(id=job_id, status="retry_pending", failed_count=0)
+    )
+    return database.get_scrape_job(job_id)
+
+
+def delete_scrape_job(job_id: str) -> bool:
+    """Delete a scrape job. Returns True if deleted."""
+    log(f"Deleting scrape job: {job_id}")
+    return database.delete_scrape_job(job_id)
 
 
 def check_auth(token: str) -> bool:

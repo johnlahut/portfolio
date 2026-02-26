@@ -1,6 +1,7 @@
 """Pydantic models shared across modules."""
 
 import json
+from datetime import datetime
 from typing import Annotated, Any
 
 from pydantic import AliasChoices, BaseModel, BeforeValidator, Field, HttpUrl
@@ -43,7 +44,8 @@ class DetectedFaceRow(FaceLocation):
     person_id: str | None = None
 
 
-class DetectedFaceInsert(ProcessedFace):
+class DetectedFaceInsert(FaceLocation):
+    encoding: Vector
     image_id: str
 
 
@@ -87,6 +89,9 @@ class ImageWithPersonMatchRow(CoreImage):
     """
 
     image_id: str
+    created_at: datetime | None = None
+    sort_is_tagged: int | None = None
+    sort_min_distance: float | None = None
     face_id: str | None = None
     face_encoding: Vector | None = None
     location_top: int | None = None
@@ -149,7 +154,7 @@ class ScrapeResponse(BaseModel):
 
 class GetImagesResponse(BaseModel):
     images: list[ImageWithFaces]
-    count: int
+    next_cursor: str | None = None
 
 
 class CreatePersonResponse(BaseModel):
@@ -163,3 +168,70 @@ class GetPeopleResponse(BaseModel):
 
 class UpdateDetectedFaceRequest(BaseModel):
     person_id: str | None = None  # None to unassign
+
+
+# ── Scrape job models ────────────────────────────────────────────────────────
+
+
+class ScrapeJobItemRow(BaseModel):
+    """portfolio.scrape_job_item"""
+
+    id: str
+    job_id: str
+    source_url: str
+    status: str
+    image_id: str | None = None
+    error: str | None = None
+
+
+class ScrapeJobRow(BaseModel):
+    """portfolio.scrape_job"""
+
+    id: str
+    url: str
+    status: str
+    total_images: int | None = None
+    processed_count: int = 0
+    skipped_count: int = 0
+    failed_count: int = 0
+    total_faces: int = 0
+    preview_url: str | None = None
+    error: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ScrapeJobUpdate(BaseModel):
+    id: str
+    status: str | None = None
+    total_images: int | None = None
+    processed_count: int | None = None
+    skipped_count: int | None = None
+    failed_count: int | None = None
+    total_faces: int | None = None
+    preview_url: str | None = None
+    error: str | None = None
+
+
+class ScrapeJobItemInsert(BaseModel):
+    job_id: str
+    source_url: str
+
+
+class ScrapeJobItemUpdate(BaseModel):
+    id: str
+    status: str | None = None
+    image_id: str | None = None
+    error: str | None = None
+
+
+class ScrapeJobDetail(ScrapeJobRow):
+    items: list[ScrapeJobItemRow] = []
+
+
+class CreateScrapeJobRequest(BaseModel):
+    url: HttpUrl
+
+
+class GetScrapeJobsResponse(BaseModel):
+    jobs: list[ScrapeJobRow]

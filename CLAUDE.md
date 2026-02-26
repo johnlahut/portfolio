@@ -67,14 +67,18 @@ Pre-commit hooks run automatically via **Husky + lint-staged** on every commit:
 - `*.{ts,tsx}` — ESLint `--fix` then Prettier `--write`
 - `*.py` — Ruff `check --fix` then Ruff `format`
 
+> **Important:** The Python venv must be active before committing, otherwise the Ruff hook will fail with `ENOENT`. Run `. venv/bin/activate` from the project root before any `git commit`.
+
 Backend linting uses **Ruff** configured in `backend/ruff.toml` (line-length 88, Python 3.12, rules: E/F/I).
 
 ## Deployment
 
 ### Frontend
+
 - **Cloudflare Pages** — auto-deploys from git. Set `VITE_API_URL` env var to the backend service URL.
 
 ### Backend (Google Cloud Run)
+
 - **Docker image** built from `backend/Dockerfile`.
 - `gcloud run deploy chirp-api --source=. --region=us-central1 --memory=2Gi --min-instances=0 --max-instances=2 --port=8080` (run from `backend/`)
 - Required env vars: `SUPABASE_URL`, `SUPABASE_KEY`, `JWT_SECRET` (set via `--set-env-vars` or Cloud Run console).

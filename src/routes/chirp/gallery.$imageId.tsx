@@ -4,13 +4,12 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 
-import { FaceOverlayImage } from '~/chirp/components/FaceOverlayImage';
+import { FaceOverlaySwitch } from '~/chirp/components/FaceOverlaySwitch';
+import { ImageFaceOverlay } from '~/chirp/components/ImageWithFaceOverlay';
 import { useDeleteImage, useImage, useTagFaceToPerson } from '~/chirp/hooks';
 
-export const Route = createFileRoute('/chirp/image/$imageId')({
+export const Route = createFileRoute('/chirp/gallery/$imageId')({
   component: RouteComponent,
 });
 
@@ -24,7 +23,8 @@ function RouteComponent() {
 
   const [showOverlays, setShowOverlays] = useState(true);
 
-  const handleClose = () => navigate({ to: '/chirp', search: (prev) => prev });
+  const handleClose = () =>
+    navigate({ to: '/chirp/gallery', search: (prev) => prev });
 
   const handleDelete = () => {
     if (confirm('Are you sure you want to delete this image?')) {
@@ -34,32 +34,38 @@ function RouteComponent() {
 
   return (
     <Dialog open onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="flex max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)] w-auto flex-col overflow-visible p-0">
+      <DialogContent
+        className="
+          flex max-h-[calc(100vh-2rem)] w-auto max-w-[calc(100vw-2rem)] flex-col
+          overflow-visible border-chirp-border/40 bg-chirp-panel p-0
+          sm:max-w-[calc(100vw-2rem)]
+        "
+      >
         {/* Overlay toggle */}
         {image?.detected_faces && image.detected_faces.length > 0 && (
-          <div className="flex items-center gap-2 px-4 pt-4">
-            <Switch
-              id="preview-overlays"
+          <div className="px-4 pt-4">
+            <FaceOverlaySwitch
+              id="preview-overlays-dialog"
               checked={showOverlays}
               onCheckedChange={setShowOverlays}
-              size="sm"
             />
-            <Label htmlFor="preview-overlays" className="text-sm text-white">
-              Face overlays
-            </Label>
           </div>
         )}
 
         {/* Image */}
-        <div className="flex flex-1 items-center justify-center overflow-visible px-4 py-8">
+        <div
+          className="
+            flex flex-1 items-center justify-center overflow-visible px-4 py-8
+          "
+        >
           {imageLoading ? (
-            <span className="text-white">Loading...</span>
+            <span className="text-chirp-text-muted">Loading...</span>
           ) : imageError || !image?.source_url ? (
-            <span className="text-white">
+            <span className="text-chirp-text-muted">
               {imageError ? 'Error loading image' : 'Image not found'}
             </span>
           ) : (
-            <FaceOverlayImage
+            <ImageFaceOverlay
               image={image}
               showOverlays={showOverlays}
               enablePersonSelect
@@ -69,7 +75,7 @@ function RouteComponent() {
                   personId: person?.id ?? null,
                 })
               }
-              imgClassName="block"
+              imgClassName="block rounded-[14px]"
               imgStyle={{
                 maxWidth: 'calc(100vw - 4rem)',
                 maxHeight: 'calc(100vh - 8rem)',
@@ -80,12 +86,18 @@ function RouteComponent() {
 
         {/* Footer */}
         {image && (
-          <DialogFooter className="px-4 pb-4 text-sm text-white sm:justify-between">
+          <DialogFooter
+            className="
+              border-t border-chirp-border/30 px-4 pt-3 pb-4 text-sm
+              text-chirp-text
+              sm:justify-between
+            "
+          >
             <div className="flex items-center gap-3">
-              <span>
+              <span className="font-medium">
                 {image.filename}
                 {image.detected_faces.length > 0 && (
-                  <span className="text-white/70 ml-2">
+                  <span className="ml-2 text-chirp-text-muted">
                     · {image.detected_faces.length} face(s)
                   </span>
                 )}
@@ -95,9 +107,13 @@ function RouteComponent() {
                   href={image.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-white/70 hover:text-white"
+                  className="
+                    inline-flex items-center gap-1 text-chirp-text-muted
+                    transition-colors
+                    hover:text-chirp-text
+                  "
                 >
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  <ExternalLink className="size-3.5" />
                   Source
                 </a>
               )}
@@ -108,7 +124,7 @@ function RouteComponent() {
               onClick={handleDelete}
               disabled={deleteImageLoading}
             >
-              <Trash2 className="h-4 w-4 mr-1" />
+              <Trash2 className="mr-1 size-4" />
               {deleteImageLoading ? 'Deleting...' : 'Delete'}
             </Button>
           </DialogFooter>

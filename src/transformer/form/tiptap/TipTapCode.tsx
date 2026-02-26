@@ -23,7 +23,7 @@ export const TipTapCode = ({
   onChange: (value: string) => void;
   flag: LanguageFlag;
 } & Omit<EditorContentProps, 'editor' | 'onChange'>) => {
-  const starryNight = useLoaderData({ from: '__root__' });
+  const starryNight = useLoaderData({ from: '/transformer' });
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   const scope = useMemo(

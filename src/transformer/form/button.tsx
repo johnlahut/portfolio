@@ -15,11 +15,11 @@ export const IsOptionalButton = ({ index }: { index: number }) => {
         <InputGroupButton
           variant={'secondary'}
           size={'icon-xs'}
-          className="font-mono relative"
+          className="relative font-mono"
           onClick={() => field.onChange(!field.value)}
         >
           <span
-            className={clsx('ease-in-out duration-600', {
+            className={clsx('duration-600 ease-in-out', {
               'blur-[2px]': !field.value,
               'text-blue-300': field.value,
             })}

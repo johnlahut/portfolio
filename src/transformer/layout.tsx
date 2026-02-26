@@ -60,12 +60,12 @@ export const TransformerLayout = () => {
   const { isCopied, copyToClipboard } = useCopyToClipboard();
 
   return (
-    <div className="flex flex-col h-full overflow-auto">
+    <div className="flex h-full flex-col overflow-auto">
       <AutoGenerator onGenerate={onGenerate} />
-      <div className="flex h-full overflow-auto mx-4">
+      <div className="mx-4 flex h-full overflow-auto">
         <ResizablePanelGroup
           direction="horizontal"
-          className="border rounded-lg max-w"
+          className="rounded-lg border"
         >
           <ResizablePanel>
             <Card className="h-full">
@@ -92,8 +92,8 @@ export const TransformerLayout = () => {
                   Make any adjustments to the parsed structure here.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex flex-col h-full overflow-hidden">
-                <div className="flex flex-row items-center gap-1 shrink-0">
+              <CardContent className="flex h-full flex-col overflow-hidden">
+                <div className="flex shrink-0 flex-row items-center gap-1">
                   <ExportSwitch />
                   <ClassifierSelect />
                   <ObjectNameInput />
@@ -104,7 +104,7 @@ export const TransformerLayout = () => {
                 </div>
 
                 <div
-                  className="overflow-auto flex flex-col gap-0.5 py-2"
+                  className="flex flex-col gap-0.5 overflow-auto py-2"
                   id="items-list"
                 >
                   <ParsedPropertyList />
