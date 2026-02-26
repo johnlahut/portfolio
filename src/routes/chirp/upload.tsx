@@ -16,10 +16,6 @@ import {
   useScrapeJobs,
 } from '~/chirp/hooks';
 
-/* ------------------------------------------------------------------ */
-/*  Route config                                                       */
-/* ------------------------------------------------------------------ */
-
 export const Route = createFileRoute('/chirp/upload')({
   component: RouteComponent,
   beforeLoad: async ({ context: { queryClient } }) => {
@@ -29,10 +25,6 @@ export const Route = createFileRoute('/chirp/upload')({
     }
   },
 });
-
-/* ------------------------------------------------------------------ */
-/*  Main component                                                     */
-/* ------------------------------------------------------------------ */
 
 function RouteComponent() {
   const [url, setUrl] = useState('');
@@ -76,7 +68,7 @@ function RouteComponent() {
         >
           <div>
             <h1 className="font-brand text-xl font-bold text-chirp-text">
-              Website Photo Scraper
+              Upload from Website
             </h1>
             <p className="text-xs text-chirp-text-body">
               Paste a URL to scrape and process all images found on the page

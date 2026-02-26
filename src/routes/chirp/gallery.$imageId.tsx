@@ -4,9 +4,8 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 
+import { FaceOverlaySwitch } from '~/chirp/components/FaceOverlaySwitch';
 import { ImageFaceOverlay } from '~/chirp/components/ImageWithFaceOverlay';
 import { useDeleteImage, useImage, useTagFaceToPerson } from '~/chirp/hooks';
 
@@ -44,19 +43,12 @@ function RouteComponent() {
       >
         {/* Overlay toggle */}
         {image?.detected_faces && image.detected_faces.length > 0 && (
-          <div className="flex items-center gap-2 px-4 pt-4">
-            <Switch
-              id="preview-overlays-v2"
+          <div className="px-4 pt-4">
+            <FaceOverlaySwitch
+              id="preview-overlays-dialog"
               checked={showOverlays}
               onCheckedChange={setShowOverlays}
-              size="sm"
             />
-            <Label
-              htmlFor="preview-overlays-v2"
-              className="text-sm text-chirp-text"
-            >
-              Face overlays
-            </Label>
           </div>
         )}
 

@@ -11,7 +11,7 @@ import { ChirpLogo } from '~/chirp/components/ChirpLogo';
 const PREVIEW_CARDS = [
   {
     src: 'https://images.unsplash.com/photo-1680298695395-e6250f105d26?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzE3Mjc0ODJ8&ixlib=rb-4.1.0&q=80&w=1080',
-    filename: 'image_0248.jpg',
+    filename: 'First Day 🌞',
     status: 'Status: Queued',
     className: 'left-14 top-[86px] h-[300px] w-[232px] -rotate-[8deg]',
     imageClassName: 'h-[200px]',
@@ -20,7 +20,7 @@ const PREVIEW_CARDS = [
   },
   {
     src: 'https://images.unsplash.com/photo-1544959112-aeaba2de733f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzE3Mjc0ODN8&ixlib=rb-4.1.0&q=80&w=1080',
-    filename: 'batch_11_993.png',
+    filename: 'Playtime 🏝️ 🛝',
     status: 'Status: Complete',
     className: 'left-[258px] top-[42px] h-[302px] w-[294px] rotate-[6deg]',
     imageClassName: 'h-[206px]',

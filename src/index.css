@@ -146,6 +146,9 @@
   /* Mobile bottom sheet surface */
   --chirp-sheet-bg: #1b181d;
 
+  /* Scan beam sparkle highlight (cream-white glow core) */
+  --chirp-scan-sparkle: #fef3c7;
+
   /* Person chip / selection accent */
   --chirp-selected-bg: #7c3aed;
   --chirp-selected-fg: #ffffff;

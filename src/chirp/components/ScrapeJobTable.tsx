@@ -147,7 +147,8 @@ export function ScrapeJobTable({
 
             <TableCell className="px-4 py-3">
               <div className="flex items-center gap-1">
-                {job.status === 'failed' && (
+                {(job.status === 'failed' ||
+                  (job.status === 'completed' && job.failed_count > 0)) && (
                   <Button
                     variant="ghost"
                     size="sm"

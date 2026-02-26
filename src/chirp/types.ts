@@ -84,6 +84,7 @@ export type ImageDimensions = {
 
 export type ScrapeJobStatus =
   | 'pending'
+  | 'retry_pending'
   | 'scraping'
   | 'processing'
   | 'completed'

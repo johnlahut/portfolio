@@ -311,8 +311,8 @@ export function ImageMasonry({
                             style={{
                               height: '90px',
                               backgroundImage: [
-                                'linear-gradient(rgba(230,162,106,0.28) 1px, transparent 1px)',
-                                'linear-gradient(90deg, rgba(230,162,106,0.28) 1px, transparent 1px)',
+                                'linear-gradient(color-mix(in srgb, var(--chirp-accent) 28%, transparent) 1px, transparent 1px)',
+                                'linear-gradient(90deg, color-mix(in srgb, var(--chirp-accent) 28%, transparent) 1px, transparent 1px)',
                               ].join(', '),
                               backgroundSize: '15px 15px',
                               maskImage:
@@ -327,9 +327,9 @@ export function ImageMasonry({
                             style={{
                               top: '90px',
                               background:
-                                'linear-gradient(90deg, transparent 0%, rgba(217,119,69,0.6) 12%, #f2b36f 30%, #fef3c7 50%, #f2b36f 70%, rgba(217,119,69,0.6) 88%, transparent 100%)',
+                                'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--chirp-accent-start) 60%, transparent) 12%, var(--chirp-accent-end) 30%, var(--chirp-scan-sparkle) 50%, var(--chirp-accent-end) 70%, color-mix(in srgb, var(--chirp-accent-start) 60%, transparent) 88%, transparent 100%)',
                               boxShadow:
-                                '0 0 16px 6px rgba(230,162,106,0.45), 0 0 6px 2px rgba(254,243,199,0.65), 0 0 2px 0px rgba(255,255,255,0.9)',
+                                '0 0 16px 6px color-mix(in srgb, var(--chirp-accent) 45%, transparent), 0 0 6px 2px color-mix(in srgb, var(--chirp-scan-sparkle) 65%, transparent), 0 0 2px 0px rgba(255,255,255,0.9)',
                             }}
                           />
                           {/* Grid below scan line — wake (fainter) */}
@@ -339,8 +339,8 @@ export function ImageMasonry({
                               top: '92px',
                               height: '100px',
                               backgroundImage: [
-                                'linear-gradient(rgba(230,162,106,0.13) 1px, transparent 1px)',
-                                'linear-gradient(90deg, rgba(230,162,106,0.13) 1px, transparent 1px)',
+                                'linear-gradient(color-mix(in srgb, var(--chirp-accent) 13%, transparent) 1px, transparent 1px)',
+                                'linear-gradient(90deg, color-mix(in srgb, var(--chirp-accent) 13%, transparent) 1px, transparent 1px)',
                               ].join(', '),
                               backgroundSize: '15px 15px',
                               backgroundPosition: '0 -2px',
@@ -366,9 +366,9 @@ export function ImageMasonry({
                                   width: '2px',
                                   height: '2px',
                                   borderRadius: '50%',
-                                  backgroundColor: '#fef3c7',
+                                  backgroundColor: 'var(--chirp-scan-sparkle)',
                                   boxShadow:
-                                    '0 0 3px 1px rgba(254,243,199,0.4), 0 -4px 0 0 rgba(254,243,199,0.12), 0 4px 0 0 rgba(254,243,199,0.12), -4px 0 0 0 rgba(254,243,199,0.12), 4px 0 0 0 rgba(254,243,199,0.12)',
+                                    '0 0 3px 1px color-mix(in srgb, var(--chirp-scan-sparkle) 40%, transparent), 0 -4px 0 0 color-mix(in srgb, var(--chirp-scan-sparkle) 12%, transparent), 0 4px 0 0 color-mix(in srgb, var(--chirp-scan-sparkle) 12%, transparent), -4px 0 0 0 color-mix(in srgb, var(--chirp-scan-sparkle) 12%, transparent), 4px 0 0 0 color-mix(in srgb, var(--chirp-scan-sparkle) 12%, transparent)',
                                   animation: `chirp-sparkle ${s.dur} ease-in-out infinite`,
                                   animationDelay: s.delay,
                                 }}

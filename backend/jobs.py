@@ -168,11 +168,11 @@ def run_scrape_job(job_id: str, is_retry: bool = False) -> None:
     finally:
         _job_lock.release()
 
-    # After releasing, pick up the next pending job if one exists.
-    # Pending jobs picked up this way are always fresh (not retries).
+    # After releasing, pick up the next pending or retry_pending job if one exists.
     next_job = database.get_next_pending_job()
     if next_job:
-        log(f"Picking up next pending job: {next_job.id}")
+        is_retry = next_job.status == "retry_pending"
+        log(f"Picking up next {'retry' if is_retry else 'pending'} job: {next_job.id}")
         threading.Thread(
-            target=run_scrape_job, args=(next_job.id, False), daemon=True
+            target=run_scrape_job, args=(next_job.id, is_retry), daemon=True
         ).start()

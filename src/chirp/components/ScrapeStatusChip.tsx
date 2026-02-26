@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 const variants: Record<string, string> = {
   queued: 'border-chirp-border/30 bg-chirp-surface text-chirp-text-body',
   pending: 'border-chirp-border/30 bg-chirp-surface text-chirp-text-body',
+  retry_pending: 'border-chirp-border/30 bg-chirp-surface text-chirp-text-body',
   scraping:
     'border-(--face-likely)/36 bg-(--face-likely-label-bg) text-(--face-likely-label-fg)',
   processing:
@@ -17,6 +18,7 @@ const variants: Record<string, string> = {
 const labels: Record<string, string> = {
   queued: 'Queued',
   pending: 'Pending',
+  retry_pending: 'Retry Pending',
   scraping: 'Scraping',
   processing: 'Processing',
   completed: 'Done',

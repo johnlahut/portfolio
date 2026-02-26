@@ -26,6 +26,7 @@ RETURNS TABLE (
 )
 LANGUAGE SQL
 STABLE
+SET search_path = portfolio
 AS $$
     SELECT
         i.id AS image_id,
@@ -122,6 +123,7 @@ RETURNS TABLE (
 )
 LANGUAGE SQL
 STABLE
+SET search_path = portfolio
 AS $$
     WITH
     -- ── Person-sort helper CTEs ────────────────────────────────────────────

@@ -3,6 +3,7 @@ import '@fontsource-variable/plus-jakarta-sans';
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, Bell, Play, ScanFace, ShieldCheck } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { DateTime } from 'luxon';
 import { motion } from 'motion/react';
 
 import { Button } from '@/components/ui/button';
@@ -15,10 +16,6 @@ import {
 import { Separator } from '@/components/ui/separator';
 
 import { ChirpLogo } from './ChirpLogo';
-
-/* ------------------------------------------------------------------ */
-/*  Data                                                               */
-/* ------------------------------------------------------------------ */
 
 type Feature = {
   icon: LucideIcon;
@@ -93,10 +90,6 @@ const FEATURES: Feature[] = [
 const ease = [0.25, 0.1, 0.25, 1] as const;
 const springy = { type: 'spring', stiffness: 120, damping: 14 } as const;
 const viewport = { once: true, margin: '-80px' } as const;
-
-/* ------------------------------------------------------------------ */
-/*  Component                                                          */
-/* ------------------------------------------------------------------ */
 
 export function ChirpLandingPage() {
   return (
@@ -482,7 +475,7 @@ export function ChirpLandingPage() {
         </div>
 
         <span className="text-xs text-chirp-text-faint">
-          © 2026 Chirp Inc. All rights reserved.
+          © {DateTime.now().toObject().year} Chirp Inc. All rights reserved.
         </span>
       </motion.footer>
     </div>

@@ -67,6 +67,8 @@ Pre-commit hooks run automatically via **Husky + lint-staged** on every commit:
 - `*.{ts,tsx}` — ESLint `--fix` then Prettier `--write`
 - `*.py` — Ruff `check --fix` then Ruff `format`
 
+> **Important:** The Python venv must be active before committing, otherwise the Ruff hook will fail with `ENOENT`. Run `. venv/bin/activate` from the project root before any `git commit`.
+
 Backend linting uses **Ruff** configured in `backend/ruff.toml` (line-length 88, Python 3.12, rules: E/F/I).
 
 ## Deployment

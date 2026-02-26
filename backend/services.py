@@ -61,6 +61,14 @@ def log(message: str) -> None:
     print(f"[services] {message}")
 
 
+# Hostnames that must be blocked regardless of what IP they resolve to.
+# Covers GCP metadata service and its numeric alias.
+_BLOCKED_HOSTNAMES = frozenset({"metadata.google.internal", "169.254.169.254"})
+
+MAX_REDIRECTS = 5
+MAX_DOWNLOAD_SIZE = 50 * 1024 * 1024  # 50 MB
+
+
 def validate_url(url: str | HttpUrl) -> str:
     """Validate a URL is safe to fetch (not targeting private/internal addresses).
 
@@ -70,23 +78,71 @@ def validate_url(url: str | HttpUrl) -> str:
     parsed = urlparse(str(url))
 
     if parsed.scheme not in ("http", "https"):
-        raise SSRFError(f"Blocked scheme: {parsed.scheme}")
+        raise SSRFError("Blocked scheme")
 
     hostname = parsed.hostname
     if not hostname:
         raise SSRFError("Missing hostname")
 
+    if hostname.lower() in _BLOCKED_HOSTNAMES:
+        raise SSRFError("Blocked hostname")
+
     try:
         addr_infos = socket.getaddrinfo(hostname, None)
     except socket.gaierror:
-        raise SSRFError(f"Cannot resolve hostname: {hostname}")
+        raise SSRFError("Cannot resolve hostname")
 
     for addr_info in addr_infos:
         ip = ipaddress.ip_address(addr_info[4][0])
-        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
-            raise SSRFError(f"Blocked address: {ip}")
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_reserved
+            or ip.is_multicast
+            or ip.is_unspecified
+        ):
+            raise SSRFError("Blocked address")
 
     return str(url)
+
+
+def _safe_request(url: str) -> tuple[str, bytes]:
+    """SSRF-safe HTTP GET with redirect validation and download size cap.
+
+    - Validates the initial URL and every redirect hop via validate_url.
+    - Never follows a redirect without re-checking the destination.
+    - Caps the response body at MAX_DOWNLOAD_SIZE (50 MB).
+
+    Returns (final_url, body_bytes).
+    Raises SSRFError, ValueError, or requests.HTTPError on failure.
+    """
+    current_url = validate_url(url)
+    for _ in range(MAX_REDIRECTS):
+        response = requests.get(
+            current_url, timeout=10, allow_redirects=False, stream=True
+        )
+        if response.status_code in (301, 302, 303, 307, 308):
+            location = response.headers.get("Location")
+            if not location:
+                raise SSRFError("Redirect with no Location header")
+            # Re-validate the redirect target before following it.
+            current_url = validate_url(urljoin(current_url, location))
+            continue
+        response.raise_for_status()
+        # Stream body with size cap.
+        declared = response.headers.get("content-length")
+        if declared and int(declared) > MAX_DOWNLOAD_SIZE:
+            raise ValueError("Response too large")
+        downloaded = 0
+        chunks: list[bytes] = []
+        for chunk in response.iter_content(8192):
+            downloaded += len(chunk)
+            if downloaded > MAX_DOWNLOAD_SIZE:
+                raise ValueError("Response too large")
+            chunks.append(chunk)
+        return current_url, b"".join(chunks)
+    raise SSRFError("Too many redirects")
 
 
 def _facial_area_to_location(facial_area: dict) -> FaceLocation:
@@ -172,19 +228,17 @@ def get_images(
 
 def scrape_images(url: str | HttpUrl) -> list[ImageInfo]:
     """Fetch a URL and extract all image sources."""
-    safe_url = validate_url(url)
-    log(f"Scraping images from: {safe_url}")
-    response = requests.get(safe_url, timeout=10)
-    response.raise_for_status()
+    log(f"Scraping images from: {url}")
+    final_url, body = _safe_request(str(url))
 
-    soup = BeautifulSoup(response.text, "html.parser")
+    soup = BeautifulSoup(body.decode("utf-8", errors="replace"), "html.parser")
     images: list[ImageInfo] = []
 
     for img in soup.find_all("img"):
         src = img.get("src")
         if not src:
             continue
-        absolute_src = urljoin(safe_url, src)
+        absolute_src = urljoin(final_url, src)
         images.append(ImageInfo(src=absolute_src, alt=img.get("alt")))
 
     log(f"Found {len(images)} images")
@@ -194,10 +248,8 @@ def scrape_images(url: str | HttpUrl) -> list[ImageInfo]:
 def load_image_from_url(url: str) -> str:
     """Download an image from URL and return the URL (DeepFace can load URLs directly)."""
     log(f"Downloading image from: {url}")
-    # Verify URL is accessible
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
-    log(f"Downloaded {len(response.content)} bytes")
+    _, body = _safe_request(url)
+    log(f"Downloaded {len(body)} bytes")
     return url
 
 
@@ -270,9 +322,8 @@ def detect_and_tag_faces(filepath: str, output_path: str | None = None) -> dict:
 def _download_image(url: str) -> tuple[np.ndarray, int, int]:
     """Download an image from URL and return (rgb_array, width, height)."""
     log(f"Downloading image from: {url}")
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
-    pil_image = Image.open(BytesIO(response.content))
+    _, body = _safe_request(url)
+    pil_image = Image.open(BytesIO(body))
     width, height = pil_image.size
     log(f"Image dimensions: {width}x{height}")
     if pil_image.mode != "RGB":
@@ -451,7 +502,7 @@ def retry_scrape_job(job_id: str) -> ScrapeJobRow | None:
     if count == 0:
         return None
     database.update_scrape_job(
-        ScrapeJobUpdate(id=job_id, status="pending", failed_count=0)
+        ScrapeJobUpdate(id=job_id, status="retry_pending", failed_count=0)
     )
     return database.get_scrape_job(job_id)
 

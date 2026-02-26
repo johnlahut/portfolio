@@ -428,8 +428,15 @@ def update_scrape_job(update: ScrapeJobUpdate) -> None:
     client.table("scrape_job").update(fields).eq("id", update.id).execute()
 
 
+_ALLOWED_INCREMENT_COLUMNS = frozenset(
+    {"processed_count", "skipped_count", "failed_count", "total_faces"}
+)
+
+
 def increment_scrape_job(job_id: str, column: str, amount: int = 1) -> None:
     """Atomically increment a counter column via the SQL RPC function."""
+    if column not in _ALLOWED_INCREMENT_COLUMNS:
+        raise ValueError(f"Invalid column: {column!r}")
     client = get_client()
     client.rpc(
         "increment_scrape_job",
@@ -504,12 +511,12 @@ def reset_failed_job_items(job_id: str) -> int:
 
 
 def get_next_pending_job() -> ScrapeJobRow | None:
-    """Return the oldest pending job, or None if none exist."""
+    """Return the oldest pending or retry_pending job, or None if none exist."""
     client = get_client()
     result = (
         client.table("scrape_job")
         .select("*")
-        .eq("status", "pending")
+        .in_("status", ["pending", "retry_pending"])
         .order("created_at")
         .limit(1)
         .execute()

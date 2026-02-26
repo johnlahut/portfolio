@@ -8,26 +8,22 @@ import {
   useNavigate,
   useSearch,
 } from '@tanstack/react-router';
-import { ScanFace, Search, Settings2, Upload } from 'lucide-react';
+import { Search, Settings2, Upload } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 
 import { AddPersonDialog } from '~/chirp/components/AddPersonDialog';
 import { ChirpLogo } from '~/chirp/components/ChirpLogo';
+import { FaceOverlaySwitch } from '~/chirp/components/FaceOverlaySwitch';
 import { FaceStateChip } from '~/chirp/components/FaceStateChip';
 import { GallerySidebar } from '~/chirp/components/GallerySidebar';
 import { ImageMasonry } from '~/chirp/components/ImageMasonry';
 import { MobileFilterSheet } from '~/chirp/components/MobileFilterSheet';
 import { PersonChip } from '~/chirp/components/PersonChip';
 import { checkAuthOptions, usePeople } from '~/chirp/hooks';
-
-/* ------------------------------------------------------------------ */
-/*  Route config                                                       */
-/* ------------------------------------------------------------------ */
 
 const defaultParams = {
   sortBy: undefined as string | undefined,
@@ -52,10 +48,6 @@ export const Route = createFileRoute('/chirp/gallery')({
     }
   },
 });
-
-/* ------------------------------------------------------------------ */
-/*  Main component                                                     */
-/* ------------------------------------------------------------------ */
 
 function RouteComponent() {
   const { people } = usePeople();
@@ -197,17 +189,12 @@ function RouteComponent() {
             </Button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-medium text-chirp-text-muted">
-              Face overlays
-            </span>
-            <ScanFace size={16} className="text-chirp-text-muted" />
-            <Switch
-              checked={showOverlays}
-              onCheckedChange={setShowOverlays}
-              size="sm"
-            />
-          </div>
+          <FaceOverlaySwitch
+            id="face-overlay-desktop"
+            checked={showOverlays}
+            onCheckedChange={setShowOverlays}
+            showIcon
+          />
         </div>
 
         {/* ── Mobile Top Bar ── */}
@@ -297,16 +284,13 @@ function RouteComponent() {
             <MobileFilterSheet
               people={peopleList}
               sortBy={sortBy}
-              showOverlays={showOverlays}
               onPersonClick={handlePersonClick}
-              onOverlaysChange={setShowOverlays}
               onClear={handleClearFilter}
             />
-            <span className="text-xs text-chirp-text-dim">Overlay</span>
-            <Switch
+            <FaceOverlaySwitch
+              id="face-overlay-mobile"
               checked={showOverlays}
               onCheckedChange={setShowOverlays}
-              size="sm"
             />
           </div>
         </div>
@@ -317,31 +301,8 @@ function RouteComponent() {
           sortPersonId={sortBy}
           search={search}
         />
-
-        {/* ── Mobile Bottom Nav ── */}
-        {/* <nav className="flex h-[68px] shrink-0 items-center justify-around border-t border-chirp-border/50 bg-[#151318] lg:hidden">
-          <button className="flex flex-col items-center gap-1">
-            <Image size={20} className="text-chirp-accent" />
-            <span className="text-[10px] font-medium text-chirp-accent">
-              Photos
-            </span>
-          </button>
-          <button className="flex flex-col items-center gap-1">
-            <Users size={20} className="text-chirp-text-faint" />
-            <span className="text-[10px] font-medium text-chirp-text-faint">
-              People
-            </span>
-          </button>
-          <Link to="/chirp/upload" className="flex flex-col items-center gap-1">
-            <Upload size={20} className="text-chirp-text-faint" />
-            <span className="text-[10px] font-medium text-chirp-text-faint">
-              Upload
-            </span>
-          </Link>
-        </nav> */}
       </div>
 
-      {/* Outlet for image detail modal */}
       <Outlet />
     </div>
   );

@@ -9,25 +9,20 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Switch } from '@/components/ui/switch';
 
 import type { Person } from '../types';
 
 type MobileFilterSheetProps = {
   people: Person[];
   sortBy?: string;
-  showOverlays: boolean;
   onPersonClick: (personId: string) => void;
-  onOverlaysChange: (value: boolean) => void;
   onClear: () => void;
 };
 
 export function MobileFilterSheet({
   people,
   sortBy,
-  showOverlays,
   onPersonClick,
-  onOverlaysChange,
   onClear,
 }: MobileFilterSheetProps) {
   const [open, setOpen] = useState(false);
@@ -80,18 +75,6 @@ export function MobileFilterSheet({
                 </button>
               ))}
             </div>
-          </div>
-
-          {/* Face Overlay */}
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-chirp-text-dim">
-              Face Overlay
-            </span>
-            <Switch
-              checked={showOverlays}
-              onCheckedChange={onOverlaysChange}
-              size="sm"
-            />
           </div>
 
           {/* Actions */}

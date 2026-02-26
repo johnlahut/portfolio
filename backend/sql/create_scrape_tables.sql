@@ -55,8 +55,14 @@ CREATE OR REPLACE FUNCTION portfolio.increment_scrape_job(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = portfolio
 AS $$
 BEGIN
+    -- Allowlist: only counter columns may be incremented via dynamic SQL.
+    IF p_column NOT IN ('processed_count', 'skipped_count', 'failed_count', 'total_faces') THEN
+        RAISE EXCEPTION 'Invalid column: %', p_column;
+    END IF;
+
     EXECUTE format(
         'UPDATE portfolio.scrape_job
             SET %I = COALESCE(%I, 0) + $1, updated_at = now()
